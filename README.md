@@ -1,2 +1,2 @@
 # geoxide
-A game engine.
+An engine.
