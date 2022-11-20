@@ -1,0 +1,12 @@
+out/
+build/
+.vs/
+backup/
+temp/
+__pycache__/
+thirdparty/SDL2/
+thirdparty/shaderc/
+
+*.pyc
+
+cmakesettings.json
