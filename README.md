@@ -1,2 +1,2 @@
-# geoxide
+# Geoxide
 An engine.
