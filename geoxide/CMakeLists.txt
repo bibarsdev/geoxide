@@ -15,7 +15,7 @@ if(GX_USE_SDL_WINDOW)
 	file(GLOB SOURCE_FILES src/SDL/*.cc)
 	target_sources				(geoxide PRIVATE ${SOURCE_FILES})
 	target_include_directories	(geoxide PRIVATE ${SDL2_SOURCE_DIR}/include)
-	target_link_libraries		(geoxide SDL2 direct3d11_renderer)
+	target_link_libraries		(geoxide SDL2)
 endif()
 
 if(WIN32)

@@ -24,6 +24,7 @@ namespace Geoxide {
 		void setVisibility(bool visible) override;
 
 		Event* pollEvent() override;
+		void destroyWindow() override;
 
 	private:
 		SDL_Window* mWindow;

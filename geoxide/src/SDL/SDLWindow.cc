@@ -13,21 +13,21 @@ namespace Geoxide {
 	{
 		if (!sSDLInitialized)
 		{
-			if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0)
+			if (SDL_Init(SDL_INIT_VIDEO) < 0)
 			{
 				std::string SDLError = SDL_GetError();
-				sLog.error("SDL initialization failed! " + SDLError);
+				sLog.error("SDL initialization failed! SDLError=\'" + SDLError + "\'");
+				return;
 			}
 			sSDLInitialized = true;
 		}
-		
 
 		mWindow = SDL_CreateWindow(
 			args.title.c_str(),
 			args.x == GX_WINDOWPOS_CENTERED ? SDL_WINDOWPOS_CENTERED : args.x,
 			args.y == GX_WINDOWPOS_CENTERED ? SDL_WINDOWPOS_CENTERED : args.y,
 			args.width, args.height, SDL_WINDOW_HIDDEN);
-
+		
 		if (!mWindow)
 		{
 			std::string SDLError = SDL_GetError();
@@ -45,11 +45,9 @@ namespace Geoxide {
 
 	SDLWindow::~SDLWindow()
 	{
-		std::string name = getTitle();
+		destroyWindow();
 
-		SDL_DestroyWindow(mWindow);
-
-		sLog.info("Destroyed window \'" + name + "\'");
+		sLog.info("Deconstructed");
 	}
 
 	NativeHandle SDLWindow::getNativeHandle() const
@@ -106,7 +104,7 @@ namespace Geoxide {
 		else
 			SDL_HideWindow(mWindow);
 	}
-
+	
 	Event* SDLWindow::pollEvent()
 	{
 		SDL_Event SDLev = {};
@@ -134,6 +132,8 @@ namespace Geoxide {
 			}
 			break;
 
+		case SDL_QUIT:
+			return new Event(kEventQuit);
 		case SDL_KEYUP:
 			return new KeyUpEvent((KeyCode)SDLev.key.keysym.sym);
 		case SDL_KEYDOWN:
@@ -149,5 +149,18 @@ namespace Geoxide {
 		}
 
 		return 0;
+	}
+
+	void SDLWindow::destroyWindow()
+	{
+		if (mWindow)
+		{
+			std::string name = getTitle();
+
+			SDL_DestroyWindow(mWindow);
+			mWindow = 0;
+
+			sLog.info("Destroyed window \'" + name + "\'");
+		}
 	}
 }

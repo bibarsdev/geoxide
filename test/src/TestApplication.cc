@@ -18,4 +18,7 @@ void TestApplication::start()
 
 void TestApplication::prepareScene()
 {
+	mBackColor = NewColor(0.52f, 0.81f, 0.92f);
+
+	setTraceAllEvents(true);
 }

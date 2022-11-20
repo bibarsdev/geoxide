@@ -2,7 +2,6 @@
 #include "Geoxide/Math3D.h"
 
 namespace Geoxide {
-namespace Math3D {
 
 	ColorRGBA NewColor(float r, float g, float b, float a)
 	{
@@ -39,5 +38,4 @@ namespace Math3D {
 #endif
 	}
 
-}
 }

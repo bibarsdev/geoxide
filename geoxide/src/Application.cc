@@ -1,21 +1,40 @@
 
 #include "Geoxide/Application.h"
 
-#define GX_EVENT_CASE(name) case kEvent##name: on##name(ev); break
-#define GX_EVENT_CAST_CASE(name) case kEvent##name: on##name((##name##Event*)ev); break
+#define EVENT_CASE(name) case kEvent##name: on##name(ev); break
+#define EVENT_CAST_CASE(name) case kEvent##name: on##name((##name##Event*)ev); break
 
 namespace Geoxide {
 
-	Application::Application() : mIsRunning(false), mRootObject(new MovableObject())
+	Application::Application() : mBackColor(NewColor(0, 0, 0)), mRootObject(new MovableObject()), mIsRunning(false)
 	{
 		sLog.info("Started");
+		
+		mTraceQuitEvents = false;
+		mTraceWindowCloseEvents = false;
+		mTraceWindowResizedEvents = false;
+		mTraceWindowFocusEvents = false;
+		mTraceWindowLostFocusEvents = false;
+		mTraceWindowMovedEvents = false;
+		mTraceKeyUpEvents = false;
+		mTraceKeyDownEvents = false;
+		mTraceMouseButtonUpEvents = false;
+		mTraceMouseButtonDownEvents = false;
+		mTraceMouseWheelEvents = false;
+		mTraceMouseMovedEvents = false;
 	}
 
 	Application::~Application()
 	{
-		delete mWindow;
-		delete mGfx;
-		delete mRootObject;
+		if (mWindow)
+			delete mWindow;
+		if (mGfx)
+			delete mGfx;
+		if (mRootObject)
+			delete mRootObject;
+
+		if (mRendererLib)
+			UnloadSharedLibrary(mRendererLib);
 
 		sLog.info("Ended");
 	}
@@ -62,12 +81,12 @@ namespace Geoxide {
 
 		if (!mGfx->hasInitialized())
 			sLog.fatal("Renderer failed to initialize");
-
-		UnloadSharedLibrary(loadedLib);
 	}
 
 	void Application::startRendering()
 	{
+		mWindow->setVisibility(true);
+
 		mIsRunning = true;
 
 		while (mIsRunning) {
@@ -76,17 +95,18 @@ namespace Geoxide {
 			{
 				switch (ev->getType())
 				{
-					GX_EVENT_CASE(WindowClose);
-					GX_EVENT_CASE(WindowFocus);
-					GX_EVENT_CASE(WindowLostFocus);
-					GX_EVENT_CAST_CASE(WindowResized);
-					GX_EVENT_CAST_CASE(WindowMoved);
-					GX_EVENT_CAST_CASE(KeyUp);
-					GX_EVENT_CAST_CASE(KeyDown);
-					GX_EVENT_CAST_CASE(MouseButtonUp);
-					GX_EVENT_CAST_CASE(MouseButtonDown);
-					GX_EVENT_CAST_CASE(MouseWheel);
-					GX_EVENT_CAST_CASE(MouseMoved);
+					EVENT_CASE(Quit);
+					EVENT_CASE(WindowClose);
+					EVENT_CASE(WindowFocus);
+					EVENT_CASE(WindowLostFocus);
+					EVENT_CAST_CASE(WindowResized);
+					EVENT_CAST_CASE(WindowMoved);
+					EVENT_CAST_CASE(KeyUp);
+					EVENT_CAST_CASE(KeyDown);
+					EVENT_CAST_CASE(MouseButtonUp);
+					EVENT_CAST_CASE(MouseButtonDown);
+					EVENT_CAST_CASE(MouseWheel);
+					EVENT_CAST_CASE(MouseMoved);
 				default:
 					sLog.error("Captured an unhandled event, type=" + std::to_string(ev->getType()));
 					break;
@@ -100,7 +120,11 @@ namespace Geoxide {
 
 	void Application::renderOneFrame()
 	{
+		mGfx->beginScene(mBackColor);
+
 		updateObjects(mRootObject->getChildren().begin(), mRootObject->getChildren().end(), mRootObject);
+		
+		mGfx->endScene();
 	}
 
 	void Application::updateObjects(Object::BufferIterator& begin, Object::BufferIterator& end, Object* parent)
@@ -112,11 +136,6 @@ namespace Geoxide {
 
 			updateObjects(obj->getChildren().begin(), obj->getChildren().end(), parent);
 		}
-	}
-
-	void Application::addObject(Object* o)
-	{
-		return mRootObject->addChild(o);
 	}
 
 }

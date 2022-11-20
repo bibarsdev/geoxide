@@ -4,6 +4,7 @@
 
 #include "Mesh.h"
 #include "Camera.h"
+
 #include "Window.h"
 
 namespace Geoxide {
@@ -19,7 +20,7 @@ namespace Geoxide {
 		virtual Texture* newTexture(const TextureInit& args) = 0;
 		virtual Shader* newShader(const ShaderInit& args) = 0;
 		virtual MeshData* newMeshData(const MeshDataInit& args) = 0;
-		virtual void beginScene(ColorRGBA clearColor);
+		virtual void beginScene(ColorRGBA clearColor) = 0;
 		virtual void setCamera(Camera* camera) = 0;
 		virtual void drawMesh(Mesh* mesh, Transform& transform) = 0;
 		virtual void endScene() = 0;

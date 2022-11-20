@@ -1,6 +1,5 @@
 
 #include "Geoxide/D3D11Renderer.h"
-#include "Geoxide/RendererEnum.h"
 
 namespace Geoxide {
 
@@ -45,6 +44,11 @@ namespace Geoxide {
 	MeshData* D3D11Renderer::newMeshData(const MeshDataInit& args)
 	{
 		return new D3D11MeshData(this, args);
+	}
+
+	void D3D11Renderer::beginScene(ColorRGBA clearColor)
+	{
+		ctx->ClearRenderTargetView(rtv.Get(), (float*)&clearColor);
 	}
 
 	void D3D11Renderer::setCamera(Camera* camera)
@@ -167,7 +171,7 @@ namespace Geoxide {
 		}
 	}
 
-	void D3D11Renderer::swapBuffers()
+	void D3D11Renderer::endScene()
 	{
 		sw->Present(0, 0);
 	}

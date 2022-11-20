@@ -3,8 +3,8 @@
 #define __GX_MESH_H__
 
 #include "Material.h"
-#include "Movable.h"
 #include "MeshData.h"
+#include "Movable.h"
 
 namespace Geoxide {
 

@@ -2,8 +2,6 @@
 #ifndef __GX_MESH_DATA_H__
 #define __GX_MESH_DATA_H__
 
-#include "Geoxide/RendererEnum.h"
-
 namespace Geoxide {
 
 	struct MeshDataInit

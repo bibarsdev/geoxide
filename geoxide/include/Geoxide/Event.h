@@ -7,6 +7,7 @@ namespace Geoxide {
 	enum EventType
 	{
 		kEventUnknown,
+		kEventQuit,
 		kEventWindowClose,
 		kEventWindowResized,
 		kEventWindowFocus,

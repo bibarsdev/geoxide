@@ -15,5 +15,6 @@
 
 #include <Geoxide/Log.h>
 #include <Geoxide/Platform.h>
+#include <Geoxide/Math3D.h>
 
 #endif // !__GEOXIDE_PCH_H__

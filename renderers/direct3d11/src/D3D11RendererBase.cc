@@ -12,7 +12,7 @@ namespace Geoxide {
 
 		DXGI_SWAP_CHAIN_DESC desc = {};
 		desc.Windowed = TRUE;
-		desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+		desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		desc.BufferCount = 2;
 		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		desc.OutputWindow = window;

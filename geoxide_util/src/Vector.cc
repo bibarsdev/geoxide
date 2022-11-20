@@ -2,7 +2,6 @@
 #include "Geoxide/Math3D.h"
 
 namespace Geoxide {
-namespace Math3D {
 
 	Vector NewVector(float x, float y, float z, float w)
 	{
@@ -25,5 +24,4 @@ namespace Math3D {
 #endif
 	}
 
-}
 }

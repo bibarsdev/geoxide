@@ -3,7 +3,7 @@
 #define __GX_CAMERA_H__
 
 #include "Movable.h"
-#include "Geoxide/RendererEnum.h"
+#include "RendererEnum.h"
 
 namespace Geoxide {
 

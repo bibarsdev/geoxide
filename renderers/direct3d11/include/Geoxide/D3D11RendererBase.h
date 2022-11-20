@@ -2,6 +2,8 @@
 #ifndef __GX_D3D11_RENDERER_BASE_H__
 #define __GX_D3D11_RENDERER_BASE_H__
 
+#include <Geoxide/Renderer.h>
+
 namespace Geoxide {
 
 	class D3D11RendererBase

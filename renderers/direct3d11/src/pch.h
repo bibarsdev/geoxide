@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include <windows.h>
-#include <d3d11.h>
+#include <d3d11_1.h>
 #include <DirectXMath.h>
 #include <wrl/client.h>
 
@@ -20,8 +20,7 @@ namespace Geoxide {
 
 #include <Geoxide/Platform.h>
 #include <Geoxide/Log.h>
-
-#include <Geoxide/Renderer.h>
+#include <Geoxide/Math3D.h>
 
 #include "Geoxide/D3D11RendererBase.h"
 

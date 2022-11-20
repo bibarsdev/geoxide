@@ -2,7 +2,7 @@
 #ifndef __GX_SHADER_H__
 #define __GX_SHADER_H__
 
-#include "Geoxide/RendererEnum.h"
+#include "RendererEnum.h"
 
 namespace Geoxide {
 

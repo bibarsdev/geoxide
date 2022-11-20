@@ -54,12 +54,12 @@ namespace Geoxide {
 	public:
 		MouseMovedEvent(uint32_t x, uint32_t y, uint32_t xRel, uint32_t yRel) : MovedEvent(kEventMouseMoved, x, y), mXRel(xRel), mYRel(yRel) {}
 
-		uint32_t getXRel() { return mXRel; }
-		uint32_t getYRel() { return mYRel; }
+		int getXRel() { return mXRel; }
+		int getYRel() { return mYRel; }
 
 	private:
 		MouseButton mMouseButton;
-		uint32_t mXRel, mYRel;
+		int mXRel, mYRel;
 	};
 
 }

@@ -14,4 +14,6 @@
 #include <windows.h>
 #endif // GX_PLATFORM_WIN32
 
+#include <Geoxide/Platform.h>
+
 #endif // !__GEOXIDE_PCH_H__

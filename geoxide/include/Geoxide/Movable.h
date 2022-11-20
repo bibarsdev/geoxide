@@ -2,8 +2,6 @@
 #ifndef __GX_MOVABLE_H__
 #define __GX_MOVABLE_H__
 
-#include <Geoxide/Math3D.h>
-
 namespace Geoxide {
 
 	class Movable

@@ -18,9 +18,10 @@ namespace Geoxide {
 		Texture* newTexture(const TextureInit& args) override;
 		Shader* newShader(const ShaderInit& args) override;
 		MeshData* newMeshData(const MeshDataInit& args) override;
+		void beginScene(ColorRGBA clearColor) override;
 		void setCamera(Camera* camera) override;
 		void drawMesh(Mesh* mesh, Transform& transform) override;
-		void swapBuffers() override;
+		void endScene() override;
 	};
 	
 	extern "C" GXAPI D3D11Renderer* NewRenderer(Window* wnd);

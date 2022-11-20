@@ -2,8 +2,8 @@
 #ifndef __GX_KEY_EVENT_H__
 #define __GX_KEY_EVENT_H__
 
-#include "Event.h"
 #include "KeyCode.h"
+#include "Event.h"
 
 namespace Geoxide {
 

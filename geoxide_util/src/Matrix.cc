@@ -2,7 +2,6 @@
 #include "Geoxide/Math3D.h"
 
 namespace Geoxide {
-namespace Math3D {
 
 	Matrix NewIdentityMatrix()
 	{
@@ -96,5 +95,4 @@ namespace Math3D {
 #endif
 	}
 
-}
 }

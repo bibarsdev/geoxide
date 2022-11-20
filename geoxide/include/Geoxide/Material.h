@@ -2,8 +2,8 @@
 #ifndef __GX_MATERIAL_H__
 #define __GX_MATERIAL_H__
 
-#include "Texture.h"
 #include "Shader.h"
+#include "Texture.h"
 
 namespace Geoxide {
 

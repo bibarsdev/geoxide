@@ -1,6 +1,4 @@
 
-#include "Geoxide/Window.h"
-
 #ifdef GX_USE_SDL_WINDOW
 #include "SDL/SDLWindow.h"
 #endif // GX_USE_SDL
