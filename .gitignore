@@ -6,6 +6,7 @@ temp/
 __pycache__/
 thirdparty/SDL2/
 thirdparty/shaderc/
+thirdparty/Eigen3/
 
 *.pyc
 

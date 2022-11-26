@@ -21,7 +21,7 @@ namespace Geoxide {
 		desc.SampleDesc.Count = 1;
 
 #ifdef _DEBUG
-		hr = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, /*D3D11_CREATE_DEVICE_DEBUG*/0, 0, 0, D3D11_SDK_VERSION,
+		hr = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, /*D3D11_CREATE_DEVICE_DEBUG*/0 , 0, 0, D3D11_SDK_VERSION,
 			&desc, sw.GetAddressOf(), &dev, 0, &ctx);
 #else
 		hr = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, 0, 0, D3D11_SDK_VERSION, &desc,
@@ -81,8 +81,8 @@ namespace Geoxide {
 		createSamplerState(D3D11_FILTER_ANISOTROPIC, D3D11_TEXTURE_ADDRESS_CLAMP, &comstates.anisotropicClamp);
 
 		// Create constant buffers
-		createBuffer(0, 1024, tempData.get(), D3D11_BIND_CONSTANT_BUFFER, constantBuffer1.GetAddressOf(), 0, false, true);
-		createBuffer(0, 1024, tempData.get(), D3D11_BIND_CONSTANT_BUFFER, constantBuffer2.GetAddressOf(), 0, false, true);
+		createBuffer(0, 1024, tempData.get(), D3D11_BIND_CONSTANT_BUFFER, vsConstantBuffer.GetAddressOf(), 0, false, true);
+		createBuffer(0, 1024, tempData.get(), D3D11_BIND_CONSTANT_BUFFER, psConstantBuffer.GetAddressOf(), 0, false, true);
 
 		hasConstructed = true;
 	}

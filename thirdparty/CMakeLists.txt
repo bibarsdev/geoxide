@@ -14,4 +14,5 @@ endif(GX_USE_SDL)
 set(SHADERC_SKIP_TESTS ON)
 set(SHADERC_SKIP_EXAMPLES ON)
 
-add_subdirectory(shaderc)
+# add_subdirectory(shaderc)
+

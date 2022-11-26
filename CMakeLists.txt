@@ -20,21 +20,34 @@ if(NOT ${LAST_PYTHON_SCRIPT_RESULT} MATCHES 0)
 	message(FATAL_ERROR "Failed to execute script 'setup.py'!")
 endif()
 
-# Set platform
-if(WIN32)
-	add_compile_definitions(GX_PLATFORM_WIN32=1)
-elseif(UNIX)
-	add_compile_definitions(GX_PLATFORM_UNIX=1)
-elseif(APPLE)
-	add_compile_definitions(GX_PLATFORM_APPLE=1)
-endif()
-
 # for the time being, we use SDL as the only windowing system
 set(GX_USE_SDL_WINDOW ON)
-add_compile_definitions(GX_USE_SDL_WINDOW=1)
 
 # Add third-party projects
 add_subdirectory(thirdparty)
+
+if(GX_USE_SDL_WINDOW)
+	add_compile_definitions(GX_USE_SDL_WINDOW=1)
+endif()
+
+# Suppress warnings
+if(MSVC)
+	add_compile_options(/wd4267)
+endif()
+
+# Set platform
+if(WIN32)
+	add_compile_definitions(GX_PLATFORM_WIN32=1)
+elseif(APPLE)
+	add_compile_definitions(GX_PLATFORM_APPLE=1)
+elseif(UNIX)
+	add_compile_definitions(GX_PLATFORM_UNIX=1)
+endif()
+
+# Set compiler
+if(MSVC)
+	add_compile_definitions(GX_COMPILER_MSVC=1)
+endif()
 
 # Add sub-projects
 add_subdirectory(geoxide_util)

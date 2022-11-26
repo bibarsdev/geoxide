@@ -15,6 +15,11 @@ namespace Geoxide {
 		return hasConstructed;
 	}
 
+	GpuProgram* D3D11Renderer::newGpuProgram(const GpuProgramInit& args)
+	{
+		return new D3D11GpuProgram(this, args);
+	}
+
 	Texture* D3D11Renderer::newTexture(const TextureInit& args)
 	{
 		switch (args.type)
@@ -27,77 +32,94 @@ namespace Geoxide {
 		}
 	}
 
-	Shader* D3D11Renderer::newShader(const ShaderInit& args)
-	{
-		switch (args.type)
-		{
-		case kShaderTypeVertex:
-			return new D3D11VertexShader(this, args);
-		case kShaderTypePixel:
-			return new D3D11PixelShader(this, args);
-		default:
-			sLog.error("Unknown shader type, type=" + std::to_string(args.type));
-			return 0;
-		}
-	}
-
 	MeshData* D3D11Renderer::newMeshData(const MeshDataInit& args)
 	{
 		return new D3D11MeshData(this, args);
 	}
 
-	void D3D11Renderer::beginScene(ColorRGBA clearColor)
+	RenderTarget* D3D11Renderer::newRenderTarget(const RenderTargetInit& args)
 	{
-		ctx->ClearRenderTargetView(rtv.Get(), (float*)&clearColor);
+		return new D3D11RenderTarget(this, args);
 	}
 
-	void D3D11Renderer::setCamera(Camera* camera)
+	void D3D11Renderer::makePerspectiveMatrix(const PerspectiveMatrixInput& args, Matrix& outMatrix)
 	{
-		const Transform& transform = camera->getTransform();
-		ProjectionType projectionType = camera->getProjectionType();
-		float width = camera->getViewportWidth(),
-			height = camera->getViewportHeight(),
-			fov = camera->getFOV(),
-			nearZ = camera->getNearZ(),
-			farZ = camera->getFarZ();
+		(XMMATRIX&)outMatrix = XMMatrixPerspectiveFovLH(args.fov, args.aspect, args.nearZ, args.farZ);
+	}
 
-		viewMatrix =
-			XMMatrixTranslationFromVector(transform.position) *
-			XMMatrixRotationQuaternion(transform.quaternion) *
-			XMMatrixScalingFromVector(transform.scaling);
+	void D3D11Renderer::makeOrthographicMatrix(const OrthographicMatrixInput& args, Matrix& outMatrix)
+	{
+		(XMMATRIX&)outMatrix = XMMatrixOrthographicLH(args.width, args.height, args.nearZ, args.farZ);
+	}
 
-		switch (projectionType)
+	void D3D11Renderer::makeLookAtMatrix(const LookAtMatrixInput& args, Matrix& outMatrix)
+	{
+		(XMMATRIX&)outMatrix = XMMatrixLookAtLH((XMVECTOR&)args.position, (XMVECTOR&)args.center, (XMVECTOR&)args.up);
+	}
+
+	void D3D11Renderer::beginScene(VectorConst clearColor, RenderTarget* renderTarget)
+	{
+		D3D11RenderTarget* rt = (D3D11RenderTarget*)renderTarget;
+		
+		if (rt)
 		{
-		default:
-		case kProjectionTypeUnknown:
-		case kProjectionTypePerspective:
-			projectionMatrix = XMMatrixPerspectiveFovLH(fov, width / height, nearZ, farZ);
-			break;
-		case kProjectionTypeOrthographic:
-			projectionMatrix = XMMatrixOrthographicLH(width, height, nearZ, farZ);
-			break;
+			ctx->ClearRenderTargetView(rt->rtv.Get(), (float*)&clearColor);
+			ctx->OMSetRenderTargets(1, rt->rtv.GetAddressOf(), 0);
+			ctx->RSSetViewports(1, &rt->vp);
+		}
+		else
+		{
+			ctx->ClearRenderTargetView(rtv.Get(), (float*)&clearColor);
+			ctx->OMSetRenderTargets(1, rtv.GetAddressOf(), 0);
+			ctx->RSSetViewports(1, &vp);
 		}
 	}
 
-	void D3D11Renderer::drawMesh(Mesh* mesh, Transform& transform)
+	void D3D11Renderer::endScene()
 	{
-		D3D11MeshData* meshData = (D3D11MeshData*)mesh->getMeshData();
-		D3D11VertexShader* vs = (D3D11VertexShader*)mesh->getVertexShader();
-		UINT WVPMatrixLoation = vs->WVPMatrixOffset, worldMatrixLocation = vs->worldMatrixOffset;
-		PrimitiveTopology primitiveTopology = mesh->getPrimitiveTopology();
-		auto& subMeshes = mesh->getSubMeshes();
+		sw->Present(1, 0);
+	}
+
+	void D3D11Renderer::draw(const DrawInput& args)
+	{
+		D3D11GpuProgram* program = (D3D11GpuProgram*)args.program;
+		D3D11MeshData* meshData = (D3D11MeshData*)args.meshData;
+
+		std::unique_ptr<ID3D11ShaderResourceView*> shaderResources(new ID3D11ShaderResourceView*[args.numTextures]);
+
+		D3D11_MAPPED_SUBRESOURCE mappedResource = {};
 		UINT bufferOffset = 0;
 
 		ctx->IASetVertexBuffers(0, 1, meshData->vertexBuffer.GetAddressOf(), &meshData->vertexStride, &bufferOffset);
 		ctx->IASetIndexBuffer(meshData->indexBuffer.Get(), meshData->indexFormat, 0);
 
-		ctx->VSSetShader((ID3D11VertexShader*)vs->shader.Get(), 0, 0);
-		ctx->IASetInputLayout(vs->layout.Get());
+		ctx->VSSetShader(program->vertexShader.Get(), 0, 0);
+		ctx->PSSetShader(program->pixelShader.Get(), 0, 0);
 
-		switch (primitiveTopology)
+		ctx->IASetInputLayout(program->inputLayout.Get());
+
+		ctx->Map(vsConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		copy(mappedResource.pData, args.vsUniformData, args.vsUniformDataSize, 1);
+		ctx->Unmap(vsConstantBuffer.Get(), 0);
+
+		ctx->Map(psConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		copy(mappedResource.pData, args.psUniformData, args.psUniformDataSize, 1);
+		ctx->Unmap(psConstantBuffer.Get(), 0);
+
+		ctx->VSSetConstantBuffers(0, 1, vsConstantBuffer.GetAddressOf());
+		ctx->PSSetConstantBuffers(0, 1, psConstantBuffer.GetAddressOf());
+
+		for (uint32_t i = 0; i < args.numTextures; i++)
+		{
+			D3D11Texture* texture = (D3D11Texture*)args.textures[i];
+			shaderResources.get()[i] = texture->srv.Get();
+		}
+
+		ctx->PSSetShaderResources(0, args.numTextures, shaderResources.get());
+
+		switch (args.topology)
 		{
 		default:
-		case kPrimitiveTopologyUnknown:
 		case kPrimitiveTopologyTriangleList:
 			ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			break;
@@ -109,71 +131,7 @@ namespace Geoxide {
 			break;
 		}
 
-		for (auto& i = subMeshes.begin(); i != subMeshes.end(); i++)
-		{
-			const SubMesh& subMesh = i->second;
-
-			const Transform& subTransform = subMesh.getTransform();
-			Transform worldTransform;
-
-			Material* material = subMesh.getMaterial();
-			D3D11PixelShader* ps = (D3D11PixelShader*)material->getPixelShader();
-			D3D11_MAPPED_SUBRESOURCE mappedResource = {};
-
-			void* unifromData = material->getUniformData();
-			size_t unifromDataSize = material->getUniformDataSize();
-
-			auto& textures = material->getTextures();
-			size_t numTextures = textures.size();
-
-			std::unique_ptr<ID3D11ShaderResourceView*> srvs(new ID3D11ShaderResourceView*[numTextures]);
-
-			worldTransform.position = XMVectorAdd(subTransform.position, transform.position);
-			worldTransform.quaternion = XMVectorMultiply(subTransform.quaternion, transform.quaternion);
-			worldTransform.scaling = XMVectorMultiply(subTransform.scaling, transform.scaling);
-
-			XMMATRIX worldMatrix =
-				XMMatrixTranslationFromVector(worldTransform.position) *
-				XMMatrixRotationQuaternion(worldTransform.quaternion) *
-				XMMatrixScalingFromVector(worldTransform.scaling);
-			XMMATRIX WVP = worldMatrix * viewMatrix * projectionMatrix;
-
-			ctx->Map(constantBuffer1.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-			uint8_t* pData = (uint8_t*)mappedResource.pData;
-
-			if (WVPMatrixLoation != -1)
-				copy(&pData[WVPMatrixLoation], &WVP, sizeof(WVP) / 16, 16);
-
-			if (worldMatrixLocation != -1)
-				copy(&pData[worldMatrixLocation], &worldMatrix, sizeof(worldMatrix) / 16, 16);
-
-			ctx->Unmap(constantBuffer1.Get(), 0);
-
-			ctx->VSSetConstantBuffers(0, 1, constantBuffer1.GetAddressOf());
-
-			for (size_t i = 0; i < numTextures; i++)
-				srvs.get()[i] = ((D3D11Texture*)(textures[i]))->srv.Get();
-
-			ctx->PSSetShaderResources(0, numTextures, srvs.get());
-
-			ctx->Map(constantBuffer2.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-			copy(mappedResource.pData, unifromData, unifromDataSize, 16);
-
-			ctx->Unmap(constantBuffer2.Get(), 0);
-
-			ctx->PSSetConstantBuffers(0, 1, constantBuffer2.GetAddressOf());
-
-			ctx->PSSetShader((ID3D11PixelShader*)ps->shader.Get(), 0, 0);
-
-			ctx->DrawIndexed(subMesh.getIndexCount(), subMesh.getIndexStart(), 0);
-		}
-	}
-
-	void D3D11Renderer::endScene()
-	{
-		sw->Present(0, 0);
+		ctx->DrawIndexed(args.indexCount, args.indexStart, 0);
 	}
 
 	D3D11Renderer* NewRenderer(Window* wnd)

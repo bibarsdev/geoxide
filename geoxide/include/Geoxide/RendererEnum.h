@@ -4,6 +4,14 @@
 
 namespace Geoxide {
 
+	enum DataType
+	{
+		kDataTypeUnknown,
+		kDataTypeFloat,
+		kDataTypeInt,
+		kDataTypeUInt,
+	};
+
 	enum PrimitiveTopology
 	{
 		kPrimitiveTopologyUnknown,
@@ -12,24 +20,10 @@ namespace Geoxide {
 		kPrimitiveTopologyTriangleList,
 	};
 
-	enum ProjectionType
-	{
-		kProjectionTypeUnknown,
-		kProjectionTypePerspective,
-		kProjectionTypeOrthographic,
-	};
-
 	enum ColorFormat
 	{
 		kColorFormatUnknown,
 		kColorFormatRGBA32,
-	};
-
-	enum ShaderType
-	{
-		kShaderTypeUnknown,
-		kShaderTypeVertex,
-		kShaderTypePixel,
 	};
 
 	enum TextureType

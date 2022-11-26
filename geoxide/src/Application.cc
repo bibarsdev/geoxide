@@ -6,7 +6,7 @@
 
 namespace Geoxide {
 
-	Application::Application() : mBackColor(NewColor(0, 0, 0)), mRootObject(new MovableObject()), mIsRunning(false)
+	Application::Application() : mBackColor(NewVector(0, 0, 0, 1)), mRootObject(new MovableObject(this)), mIsRunning(false), mHasInitialized(false)
 	{
 		sLog.info("Started");
 		
@@ -45,6 +45,9 @@ namespace Geoxide {
 
 		initializeWindow(args.window);
 		initializeRenderer();
+		initializeMainCamera();
+
+		mHasInitialized = true;
 
 		sLog.info("Initialized");
 	}
@@ -60,7 +63,7 @@ namespace Geoxide {
 		NewRendererProc NewRenderer = 0;
 
 #ifdef GX_PLATFORM_WIN32
-		std::string rendererPath = "direct3d11_renderer.dll";
+		std::string rendererPath = "renderers/direct3d11_renderer.dll";
 #endif // GX_PLATFORM_WIN32
 
 		// Load library, call NewRenderer then unload
@@ -83,9 +86,22 @@ namespace Geoxide {
 			sLog.fatal("Renderer failed to initialize");
 	}
 
+	void Application::initializeMainCamera()
+	{
+		mMainCamera = new Camera(
+			mWindow->getClientWidth(), mWindow->getClientHeight(),
+			0.1f, 1000.f, 
+			3.14f / 3.f,
+			Camera::kProjectionTypePerspective);
+	}
+
 	void Application::startRendering()
 	{
-		mWindow->setVisibility(true);
+		if (!mHasInitialized)
+			sLog.fatal("Can't start rendering without initializing first");
+
+		if (!mWindow->getVisibility())
+			mWindow->setVisibility(true);
 
 		mIsRunning = true;
 
@@ -114,13 +130,25 @@ namespace Geoxide {
 				delete ev;
 			}
 
+			onFrameStart(0);
 			renderOneFrame();
+			onFrameEnd(0);
 		}
+	}
+
+	void Application::stopRendering()
+	{
+		mIsRunning = false;
 	}
 
 	void Application::renderOneFrame()
 	{
-		mGfx->beginScene(mBackColor);
+		mGfx->beginScene(mBackColor, 0);
+
+		mMainCamera->updateViewMatrix(mGfx);
+		mMainCamera->updateProjectionMatrix(mGfx);
+
+		mViewProjMatrix = MatrixMultiply(mMainCamera->getViewMatrix(), mMainCamera->getProjectionMatrix());
 
 		updateObjects(mRootObject->getChildren().begin(), mRootObject->getChildren().end(), mRootObject);
 		
@@ -132,7 +160,7 @@ namespace Geoxide {
 		for (auto& i = begin; i < end; i++)
 		{
 			auto obj = *i;
-			obj->update(mGfx, parent);
+			obj->update(parent);
 
 			updateObjects(obj->getChildren().begin(), obj->getChildren().end(), parent);
 		}

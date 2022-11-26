@@ -25,10 +25,11 @@ namespace Geoxide {
 
 		virtual NativeHandle getNativeHandle() const = 0;
 		virtual const char* getTitle() const = 0;
-		virtual uint32_t getWidth() const = 0;
-		virtual uint32_t getHeight() const = 0;
+		virtual uint32_t getClientWidth() const = 0;
+		virtual uint32_t getClientHeight() const = 0;
 		virtual uint32_t getX() const = 0;
 		virtual uint32_t getY() const = 0;
+		virtual bool getVisibility() const = 0;
 
 		virtual void setVisibility(bool visible) = 0;
 

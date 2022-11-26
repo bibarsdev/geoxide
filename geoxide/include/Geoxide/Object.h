@@ -3,8 +3,12 @@
 #define __GX_OBJECT_H__
 
 #include "Renderer.h"
+#include "Movable.h"
+#include "Mesh.h"
 
 namespace Geoxide {
+
+	class Application;
 
 	class Object
 	{
@@ -13,34 +17,46 @@ namespace Geoxide {
 		using BufferIterator = Buffer::const_iterator;
 
 	public:
+		Object(Application* app) : mApp(app) {}
 		virtual ~Object() = default;
-		virtual void update(Renderer* gfx, Object* parent) = 0;
 
+		Application* getApplication() const { return mApp; }
 		const Buffer& getChildren() const { return mChildren; }
 
+		virtual void update(Object* parent);
+
 		void addChild(Object* o) { mChildren.push_back(o); }
+		void clearChildren() { mChildren.clear(); }
 
 	protected:
+		Application* mApp;
 		Buffer mChildren;
 	};
 
 	class MovableObject : public Object, public Movable
 	{
 	public:
-		~MovableObject() = default;
-		void update(Renderer* gfx, Object* parent) override {}
+		MovableObject(Application* app) : Object(app) {}
+		virtual ~MovableObject() = default;
+
+		virtual void update(Object* parent) override;
 	};
 
 	class MeshObject : public MovableObject
 	{
 	public:
-		~MeshObject() = default;
-		void update(Renderer* gfx, Object* _parent) override;
+		MeshObject(Application* app, Mesh* mesh);
+		virtual ~MeshObject() = default;
+
+		Renderer* getRenderer() { return mGfx; };
+		Mesh* getMesh() { return mMesh; };
+
+		virtual void update(Object* parent) override;
 
 	protected:
+		Renderer* mGfx;
 		Mesh* mMesh;
 	};
-
 }
 
 #endif // __GX_OBJECT_H__

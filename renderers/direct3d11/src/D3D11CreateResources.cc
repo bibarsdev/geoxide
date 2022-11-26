@@ -123,32 +123,26 @@ namespace Geoxide {
 	{
 		ComPtr<ID3DBlob> bytecode = 0;
 		ComPtr<ID3DBlob> error = 0;
+		HRESULT hr = 0;
 
 		if (!isCompiled)
 		{
 			D3DCompile(codeBuffer, codeSize, 0, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, type, 0, 0, bytecode.GetAddressOf(), error.GetAddressOf());
 
-#ifdef _DEBUG
 			if (!bytecode)
-			{
-				MessageBoxA(0, (LPCSTR)error->GetBufferPointer(), "shader error!", 0);
 				return false;
-			}
-#endif // _DEBUG
 
 			codeBuffer = bytecode->GetBufferPointer();
 			codeSize = bytecode->GetBufferSize();
 		}
 
-		HRESULT hr = 0;
-
 		switch (type[0])
 		{
 		case 'v':
-			dev->CreateVertexShader(codeBuffer, codeSize, 0, (ID3D11VertexShader**)outShader);
+			hr = dev->CreateVertexShader(codeBuffer, codeSize, 0, (ID3D11VertexShader**)outShader);
 			break;
 		case 'p':
-			dev->CreatePixelShader(codeBuffer, codeSize, 0, (ID3D11PixelShader**)outShader);
+			hr = dev->CreatePixelShader(codeBuffer, codeSize, 0, (ID3D11PixelShader**)outShader);
 			break;
 		default:
 			return false;
@@ -159,12 +153,24 @@ namespace Geoxide {
 			return false;
 
 		if (outInputLayout)
-			return createInputLayout(codeBuffer, codeSize, outInputLayout);
+			return generateInputLayout(codeBuffer, codeSize, outInputLayout);
 
 		return true;
 	}
 
-	bool D3D11RendererBase::createInputLayout(const void* byteCodeBuffer, UINT byteCodeSize, ID3D11InputLayout** outInputLayout)
+	bool D3D11RendererBase::createInputLayout(const D3D11_INPUT_ELEMENT_DESC* elements, UINT numElements, 
+		const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout)
+	{
+		HRESULT hr = dev->CreateInputLayout(elements, numElements, byteCodeBuffer, byteCodeSize, outInputLayout);
+		
+		if (FAILED(hr))
+			return false;
+
+		return true;
+	}
+
+	// copied from https://gist.github.com/Cody-Duncan/d85740563ceea99f6619
+	bool D3D11RendererBase::generateInputLayout(const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout)
 	{
 		ComPtr<ID3D11ShaderReflection> ref;
 		HRESULT hr = D3DReflect(byteCodeBuffer, byteCodeSize, __uuidof(ID3D11ShaderReflection), (void**)ref.GetAddressOf());
@@ -222,12 +228,7 @@ namespace Geoxide {
 			inputLayoutDesc.push_back(elementDesc);
 		}
 
-		dev->CreateInputLayout(&inputLayoutDesc[0], inputLayoutDesc.size(), byteCodeBuffer, byteCodeSize, outInputLayout);
-
-		if (FAILED(hr))
-			return false;
-
-		return true;
+		return createInputLayout(inputLayoutDesc.data(), inputLayoutDesc.size(), byteCodeBuffer, byteCodeSize, outInputLayout);
 	}
 
 	bool D3D11RendererBase::createBuffer(UINT stride, UINT size, const void* data, D3D11_BIND_FLAG bindFlag,

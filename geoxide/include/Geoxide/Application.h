@@ -6,6 +6,7 @@
 #include "KeyEvent.h"
 #include "WindowEvent.h"
 
+#include "Camera.h"
 #include "Object.h"
 
 namespace Geoxide {
@@ -17,6 +18,15 @@ namespace Geoxide {
 
 	class Application
 	{
+	public:
+		void setBackColor(VectorConst color) { mBackColor = color; }
+
+		Window* getWindow() const { return mWindow; }
+		Renderer* getRenderer() const { return mGfx; }
+		Object* getRootObject() const { return mRootObject; }
+		Camera* getMainCamera() const { return mMainCamera; }
+		MatrixConst getViewProjMatrix() const { return mViewProjMatrix; } // TODO: Add scene manager
+
 	protected:
 		Application();
 		virtual ~Application();
@@ -24,11 +34,14 @@ namespace Geoxide {
 		void initialize(const ApplicationInit& args);
 
 		void startRendering();
+		void stopRendering();
 
 		void setTraceAllEvents(bool traceAllEvents);
 
+		virtual void onFrameStart(Event*);
+		virtual void onFrameEnd(Event*);
 		virtual void onQuit(Event*);
-		virtual void onWindowClose(Event*);
+		virtual void onWindowClose(Event*); // TODO: Never gets called. Remove or fix later
 		virtual void onWindowResized(WindowResizedEvent*);
 		virtual void onWindowFocus(Event*);
 		virtual void onWindowLostFocus(Event*);
@@ -43,8 +56,10 @@ namespace Geoxide {
 	protected:
 		Window* mWindow;
 		Renderer* mGfx;
-		ColorRGBA mBackColor;
 		Object* mRootObject;
+		Camera* mMainCamera;
+		Vector mBackColor;
+		Matrix mViewProjMatrix;
 		bool mIsRunning;
 		bool mTraceQuitEvents;
 		bool mTraceWindowCloseEvents;
@@ -58,10 +73,12 @@ namespace Geoxide {
 		bool mTraceMouseButtonDownEvents;
 		bool mTraceMouseWheelEvents;
 		bool mTraceMouseMovedEvents;
+		GX_DECLARE_LOG("Application");
 
 	private:
 		void initializeWindow(const WindowInit& args);
 		void initializeRenderer();
+		void initializeMainCamera();
 		void renderOneFrame();
 		void updateObjects(Object::BufferIterator& begin, Object::BufferIterator& end, Object* parent);
 
@@ -70,8 +87,7 @@ namespace Geoxide {
 		std::vector<std::string> mAvailableRenderers;
 		std::string mCurrentRenderer;
 		SharedLibrary mRendererLib;
-		bool mHasConfigured;
-		GX_DECLARE_LOG("Application");
+		bool mHasInitialized;
 	};
 
 }

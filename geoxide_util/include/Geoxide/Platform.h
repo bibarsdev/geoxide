@@ -14,6 +14,9 @@ namespace Geoxide { using NativeHandle = HANDLE; using SharedLibrary = HMODULE; 
 #define GetSharedLibraryProc(lib, proc) GetProcAddress(lib, proc)
 #endif // GX_PLATFORM_WIN32
 
+#ifdef GX_COMPILER_MSVC
+#define GXVECTOR __vectorcall
+#endif // GX_COMPILER_MSVC
 
 #endif // !__GX_PLATFORM_H__
 

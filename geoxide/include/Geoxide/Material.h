@@ -2,7 +2,7 @@
 #ifndef __GX_MATERIAL_H__
 #define __GX_MATERIAL_H__
 
-#include "Shader.h"
+#include "GpuProgram.h"
 #include "Texture.h"
 
 namespace Geoxide {
@@ -10,23 +10,18 @@ namespace Geoxide {
 	class Material
 	{
 	public:
-		Material();
-		Material(size_t uniformDataSize, Shader* pixelShader);
-		~Material();
+		Material() : mProgram(0) {}
+		Material(GpuProgram* program) : mProgram(program) {}
 
-		std::vector<Texture*>& getTextures() { return textures; }
-		Shader* getPixelShader() { return pixelShader; }
-		void* getUniformData() { return uniformData; }
-		size_t getUniformDataSize() { return uniformDataSize; }
+		const auto& getTextures() const { return mTextures; }
+		Texture* getTexture(uint32_t i) const { return mTextures[i]; }
+		GpuProgram* getGpuProgram() const { return mProgram; }
 
-		void allocateUniformData(uint32_t size);
-		void copyUniformData(uint32_t destOffset, const void* src, uint32_t size);
+		void addTexture(Texture* texture) { mTextures.push_back(texture); }
 
 	protected:
-		std::vector<Texture*> textures;
-		void* uniformData;
-		size_t uniformDataSize;
-		Shader* pixelShader;
+		std::vector<Texture*> mTextures;
+		GpuProgram* mProgram;
 	};
 
 }

@@ -26,7 +26,7 @@ namespace Geoxide {
 			args.title.c_str(),
 			args.x == GX_WINDOWPOS_CENTERED ? SDL_WINDOWPOS_CENTERED : args.x,
 			args.y == GX_WINDOWPOS_CENTERED ? SDL_WINDOWPOS_CENTERED : args.y,
-			args.width, args.height, SDL_WINDOW_HIDDEN);
+			args.width, args.height, SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI);
 		
 		if (!mWindow)
 		{
@@ -34,11 +34,13 @@ namespace Geoxide {
 			sLog.error("Failed to create window \'" + args.title + "\', SDLError=\'" + SDLError + "\'");
 		}
 
+		mVisible = false;
+
 		sLog.info("Created a new window");
 
 		sLog.trace("Title: " + std::string(getTitle()));
-		sLog.trace("Width: " + std::to_string(getWidth()));
-		sLog.trace("Height: " + std::to_string(getHeight()));
+		sLog.trace("Client Width: " + std::to_string(getClientWidth()));
+		sLog.trace("Client Height: " + std::to_string(getClientHeight()));
 		sLog.trace("X: " + std::to_string(getX()));
 		sLog.trace("Y: " + std::to_string(getY()));
 	}
@@ -46,8 +48,6 @@ namespace Geoxide {
 	SDLWindow::~SDLWindow()
 	{
 		destroyWindow();
-
-		sLog.info("Deconstructed");
 	}
 
 	NativeHandle SDLWindow::getNativeHandle() const
@@ -69,14 +69,14 @@ namespace Geoxide {
 		return SDL_GetWindowTitle(mWindow);
 	}
 
-	uint32_t SDLWindow::getWidth() const
+	uint32_t SDLWindow::getClientWidth() const
 	{
 		int i = 0;
 		SDL_GetWindowSize(mWindow, &i, 0);
 		return i;
 	}
 
-	uint32_t SDLWindow::getHeight() const
+	uint32_t SDLWindow::getClientHeight() const
 	{
 		int i = 0;
 		SDL_GetWindowSize(mWindow, 0, &i);

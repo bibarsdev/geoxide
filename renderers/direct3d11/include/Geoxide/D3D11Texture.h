@@ -7,17 +7,18 @@ namespace Geoxide {
 	class D3D11Texture : public Texture
 	{
 	public:
-		virtual ~D3D11Texture() = default;
+		~D3D11Texture() = default;
 
 		ComPtr<ID3D11ShaderResourceView> srv;
 		ComPtr<ID3D11Resource> texture;
+		GX_DECLARE_LOG("D3D11Texture");
 	};
 
 	class D3D11Texture2D : public D3D11Texture
 	{
 	public:
 		D3D11Texture2D(D3D11RendererBase* gfx, const TextureInit& args);
-		virtual ~D3D11Texture2D() = default;
+		~D3D11Texture2D() = default;
 	};
 
 	// TODO

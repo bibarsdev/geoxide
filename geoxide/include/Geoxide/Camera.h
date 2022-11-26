@@ -3,40 +3,53 @@
 #define __GX_CAMERA_H__
 
 #include "Movable.h"
-#include "RendererEnum.h"
+#include "Renderer.h"
 
 namespace Geoxide {
 
 	class Camera : public Movable
 	{
 	public:
+		enum ProjectionType
+		{
+			kProjectionTypeUnknown,
+			kProjectionTypePerspective,
+			kProjectionTypeOrthographic,
+		};
+
+	public:
 		Camera() :
-			width(0), height(0), nearZ(0), farZ(0), fov(0), projectionType(kProjectionTypeUnknown) {}
+			mWidth(0), mHeight(0), mNearZ(0), mFarZ(0), mFov(0), mProjectionType(kProjectionTypeUnknown) {}
 		Camera(float width, float height, float nearZ, float farZ, float fov, ProjectionType projectionType) :
-			width(width), height(height), nearZ(nearZ), farZ(farZ), fov(fov), projectionType(projectionType) {}
+			mWidth(width), mHeight(height), mNearZ(nearZ), mFarZ(farZ), mFov(fov), mProjectionType(projectionType) {}
 
-		void setProjectionType(ProjectionType type) { projectionType = type; }
-		void setNearZ(float z) { nearZ = z; }
-		void setFarZ(float z) { farZ = z; }
-		void setFOV(float rad) { fov = rad; }
-		void setViewportWidth(float w) { width = w; }
-		void setViewportHeight(float h) { height = h; }
-		void setBackGroundColor(ColorRGBA c) { backColor = c; }
+		void setProjectionType(ProjectionType type) { mProjectionType = type; }
+		void setNearZ(float z) { mNearZ = z; }
+		void setFarZ(float z) { mFarZ = z; }
+		void setFOV(float rad) { mFov = rad; }
+		void setViewWidth(float w) { mWidth = w; }
+		void setViewHeight(float h) { mHeight = h; }
 
-		ProjectionType getProjectionType() const { return projectionType; }
-		float getNearZ() const { return nearZ; }
-		float getFarZ() const { return farZ; }
-		float getFOV() const { return fov; }
-		float getViewportWidth() const { return width; }
-		float getViewportHeight() const { return height; }
-		ColorRGBA getBackGroundColor() const { return backColor; }
+		ProjectionType getProjectionType() const { return mProjectionType; }
+		float getNearZ() const { return mNearZ; }
+		float getFarZ() const { return mFarZ; }
+		float getFOV() const { return mFov; }
+		float getViewWidth() const { return mWidth; }
+		float getViewHeight() const { return mHeight; }
+
+		MatrixConst getViewMatrix() { return mViewMatrix; }
+		MatrixConst getProjectionMatrix() { return mProjectionMatrix; }
+
+		void updateViewMatrix(Renderer* gfx);
+		void updateProjectionMatrix(Renderer* gfx);
 
 	private:
-		float width, height;
-		float nearZ, farZ;
-		float fov;
-		ColorRGBA backColor;
-		ProjectionType projectionType;
+		float mWidth, mHeight;
+		float mNearZ, mFarZ;
+		float mFov;
+		ProjectionType mProjectionType;
+		Matrix mViewMatrix;
+		Matrix mProjectionMatrix;
 	};
 
 }

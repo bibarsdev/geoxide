@@ -9,6 +9,22 @@ namespace Geoxide {
 	class D3D11RendererBase
 	{
 	public:
+		using ILFormatKey = std::pair<uint32_t, DataType>;
+
+		struct ILFormatKeyHash
+		{
+			size_t operator()(const ILFormatKey& p) const
+			{
+				auto hash1 = std::hash<uint32_t>{}(p.first);
+				auto hash2 = std::hash<DataType>{}(p.second);
+
+				return hash1 ^ hash2;
+			}
+		};
+
+		using ILFormatMap = std::unordered_map<ILFormatKey, DXGI_FORMAT, ILFormatKeyHash>;
+
+	public:
 		D3D11RendererBase(HWND window);
 		~D3D11RendererBase();
 
@@ -20,7 +36,9 @@ namespace Geoxide {
 		bool createDepthStencilView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11DepthStencilView** outDepthStencil);
 		bool createShader(const void* codeBuffer, SIZE_T codeSize, const char* entryPoint, const char* type, bool isCompiled,
 			ID3D11DeviceChild** outShader, ID3D11InputLayout** outInputLayout);
-		bool createInputLayout(const void* byteCodeBuffer, UINT byteCodeSize, ID3D11InputLayout** outInputLayout);
+		bool createInputLayout(const D3D11_INPUT_ELEMENT_DESC* elements, UINT numElements, 
+			const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout);
+		bool generateInputLayout(const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout);
 		bool createBuffer(UINT stride, UINT size, const void* data, D3D11_BIND_FLAG bindFlag,
 			ID3D11Buffer** outBuffer, ID3D11ShaderResourceView** outSRV,
 			bool enableRead, bool enableWrite);
@@ -30,23 +48,23 @@ namespace Geoxide {
 		void createRasterizerState(D3D11_CULL_MODE cullMode, D3D11_FILL_MODE fillMode, ID3D11RasterizerState** pResult);
 		void createSamplerState(D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE addressMode, ID3D11SamplerState** pResult);
 
-		UINT bytesPerPixel(DXGI_FORMAT fmt);
-		DXGI_FORMAT translateFormat(ColorFormat format);
-		void copy(void* dest, const void* src, UINT numElements, UINT elementLength);
+		static UINT bytesPerPixel(DXGI_FORMAT fmt);
+		static DXGI_FORMAT translateFormat(ColorFormat format);
+		static DXGI_FORMAT getInputLayoutFormat(uint32_t length, DataType type);
+		static void copy(void* dest, const void* src, UINT numElements, UINT elementLength);
 
+	public:
 		bool hasConstructed;
-		
+
 		ComPtr<ID3D11Device> dev;
 		ComPtr<ID3D11DeviceContext> ctx;
 		ComPtr<IDXGISwapChain> sw;
 		ComPtr<ID3D11RenderTargetView> rtv;
 		ComPtr<ID3D11DepthStencilView> dsv;
-		ComPtr<ID3D11Buffer> constantBuffer1;
-		ComPtr<ID3D11Buffer> constantBuffer2;
+		ComPtr<ID3D11Buffer> vsConstantBuffer;
+		ComPtr<ID3D11Buffer> psConstantBuffer;
 
 		D3D11_VIEWPORT vp;
-		XMMATRIX viewMatrix;
-		XMMATRIX projectionMatrix;
 
 		struct
 		{
@@ -70,6 +88,9 @@ namespace Geoxide {
 			ID3D11SamplerState* anisotropicWrap;
 			ID3D11SamplerState* anisotropicClamp;
 		} comstates;
+
+		static ILFormatMap ILFormatDictionary;
+
 		GX_DECLARE_LOG("D3D11Renderer");
 	};
 

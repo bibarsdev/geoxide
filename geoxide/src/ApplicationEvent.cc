@@ -19,6 +19,14 @@ namespace Geoxide {
 		mTraceMouseMovedEvents = traceAllEvents;
 	}
 
+	void Application::onFrameStart(Event*)
+	{
+	}
+
+	void Application::onFrameEnd(Event*)
+	{
+	}
+
 	void Application::onQuit(Event* e)
 	{
 		if (mTraceQuitEvents)

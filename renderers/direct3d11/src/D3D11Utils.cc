@@ -8,6 +8,24 @@
 
 namespace Geoxide {
 
+	D3D11RendererBase::ILFormatMap D3D11RendererBase::ILFormatDictionary = {
+		{{1 * sizeof(float), kDataTypeFloat}, DXGI_FORMAT_R32_FLOAT},
+		{{1 * sizeof(int), kDataTypeInt}, DXGI_FORMAT_R32_SINT},
+		{{1 * sizeof(UINT), kDataTypeUInt}, DXGI_FORMAT_R32_UINT},
+
+		{{2 * sizeof(float), kDataTypeFloat}, DXGI_FORMAT_R32G32_FLOAT},
+		{{2 * sizeof(int), kDataTypeInt}, DXGI_FORMAT_R32G32_SINT},
+		{{2 * sizeof(UINT), kDataTypeUInt}, DXGI_FORMAT_R32G32_UINT},
+
+		{{3 * sizeof(float), kDataTypeFloat}, DXGI_FORMAT_R32G32B32_FLOAT},
+		{{3 * sizeof(int), kDataTypeInt}, DXGI_FORMAT_R32G32B32_SINT},
+		{{3 * sizeof(UINT), kDataTypeUInt}, DXGI_FORMAT_R32G32B32_UINT},
+
+		{{4 * sizeof(float), kDataTypeFloat}, DXGI_FORMAT_R32G32B32A32_FLOAT},
+		{{4 * sizeof(int), kDataTypeInt}, DXGI_FORMAT_R32G32B32A32_SINT},
+		{{4 * sizeof(UINT), kDataTypeUInt}, DXGI_FORMAT_R32G32B32A32_UINT},
+	};
+
 	UINT D3D11RendererBase::bytesPerPixel(DXGI_FORMAT fmt)
 	{
 		switch (fmt)
@@ -133,6 +151,19 @@ namespace Geoxide {
 			sLog.error("Unknown color format");
 			return DXGI_FORMAT_UNKNOWN;
 		}
+	}
+
+	DXGI_FORMAT D3D11RendererBase::getInputLayoutFormat(uint32_t length, DataType type)
+	{
+		auto& iter = ILFormatDictionary.find({length, type});
+
+		if (iter == ILFormatDictionary.end())
+		{
+			sLog.error("Unknown input layout element format, length=" + std::to_string(length) + ", type=" + std::to_string(type));
+			return DXGI_FORMAT_UNKNOWN;
+		}
+
+		return iter->second;
 	}
 
 	void D3D11RendererBase::copy(void* dest, const void* src, UINT numElements, UINT elementLength)

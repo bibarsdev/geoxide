@@ -16,10 +16,11 @@ namespace Geoxide {
 
 		NativeHandle getNativeHandle() const override;
 		const char* getTitle() const override;
-		uint32_t getWidth() const override;
-		uint32_t getHeight() const override;
+		uint32_t getClientWidth() const override;
+		uint32_t getClientHeight() const override;
 		uint32_t getX() const override;
 		uint32_t getY() const override;
+		bool getVisibility() const override { return mVisible; }
 
 		void setVisibility(bool visible) override;
 
@@ -28,6 +29,7 @@ namespace Geoxide {
 
 	private:
 		SDL_Window* mWindow;
+		bool mVisible;
 		inline static bool sSDLInitialized = false;
 		GX_DECLARE_LOG("SDLWindow");
 	};

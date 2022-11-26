@@ -4,16 +4,6 @@
 
 namespace Geoxide {
 
-	struct MeshDataInit
-	{
-		const void* vertexData;
-		const void* indexData;
-		uint32_t vertexLength;
-		uint32_t indexLength;
-		uint32_t vertexDataSize;
-		uint32_t indexDataSize;
-	};
-
 	class MeshData
 	{
 	public:
