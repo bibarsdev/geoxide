@@ -42,7 +42,7 @@ void MeshScene::prepareScene()
 		4, 3, 7
 	};
 
-	MeshDataInit cubeMeshDesc;
+	MeshDataInit cubeMeshDesc = {};
 
 	cubeMeshDesc.vertexData = cubeVertexData;
 	cubeMeshDesc.vertexDataSize = sizeof(cubeVertexData);
@@ -54,15 +54,9 @@ void MeshScene::prepareScene()
 
 	mCubeMeshData = mGfx->newMeshData(cubeMeshDesc);
 
-	GpuProgramInit colorProgramDesc;
+	GpuProgramInit colorProgramDesc = {};
 
-	static const InputElement inputLayout[] = {
-		{ "POSITION", 0, 0, 4 * sizeof(float), kDataTypeFloat },
-		{ "COLOR", 0, 4 * sizeof(float), 4 * sizeof(float), kDataTypeFloat },
-	};
-
-	colorProgramDesc.inputLayout = inputLayout;
-	colorProgramDesc.inputLayoutSize = sizeof(inputLayout) / sizeof(inputLayout[0]);
+	colorProgramDesc.name = "Color";
 
 #ifdef GX_PLATFORM_WIN32
 
@@ -70,27 +64,39 @@ void MeshScene::prepareScene()
 	ID3DBlob* psByteCode = 0;
 	ID3DBlob* errorMsg = 0;
 
-	HRESULT hr = D3DCompileFromFile(L"assets/shaders/Color.fx", 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, "vertex", "vs_4_0", 0, 0, &vsByteCode, &errorMsg);
+	HRESULT hr = D3DCompileFromFile(L"assets/shaders/Color.hlsl", 
+		0, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"vertex", "vs_4_0",
+		D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_PACK_MATRIX_ROW_MAJOR, 0,
+		&vsByteCode, &errorMsg);
 
 	if (FAILED(hr))
 		if (errorMsg)
-			sLog.fatal("Failed to compile vertex shader, errorMsg=" + std::string((const char*)errorMsg->GetBufferPointer()));
+			Log::Fatal("Failed to compile vertex shader, errorMsg=" + std::string((const char*)errorMsg->GetBufferPointer()));
 		else
-			sLog.fatal("Failed to compile vertex shader");
+			Log::Fatal("Failed to compile vertex shader");
 
-	hr = D3DCompileFromFile(L"assets/shaders/Color.fx", 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, "pixel", "ps_4_0", 0, 0, &psByteCode, &errorMsg);
+	hr = D3DCompileFromFile(L"assets/shaders/Color.hlsl",
+		0, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"pixel", "ps_4_0",
+		D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_PACK_MATRIX_ROW_MAJOR, 0,
+		&psByteCode, &errorMsg);
 
 	if (FAILED(hr))
 		if (errorMsg)
-			sLog.fatal("Failed to compile pixel shader, errorMsg=" + std::string((const char*)errorMsg->GetBufferPointer()));
+			Log::Fatal("Failed to compile pixel shader, errorMsg=" + std::string((const char*)errorMsg->GetBufferPointer()));
 		else
-			sLog.fatal("Failed to compile pixel shader");
+			Log::Fatal("Failed to compile pixel shader");
 
-	colorProgramDesc.vertex.byteCode = vsByteCode->GetBufferPointer();
-	colorProgramDesc.vertex.byteCodeSize = vsByteCode->GetBufferSize();
+	colorProgramDesc.vertex.name = "Color.vertex";
+	colorProgramDesc.vertex.code = vsByteCode->GetBufferPointer();
+	colorProgramDesc.vertex.codeSize = vsByteCode->GetBufferSize();
+	colorProgramDesc.vertex.isCompiled = true;
 
-	colorProgramDesc.pixel.byteCode = psByteCode->GetBufferPointer();
-	colorProgramDesc.pixel.byteCodeSize = psByteCode->GetBufferSize();
+	colorProgramDesc.pixel.name = "Color.pixel";
+	colorProgramDesc.pixel.code = psByteCode->GetBufferPointer();
+	colorProgramDesc.pixel.codeSize = psByteCode->GetBufferSize();
+	colorProgramDesc.pixel.isCompiled = true;
 
 	mColorProgram = mGfx->newGpuProgram(colorProgramDesc);
 
@@ -120,7 +126,7 @@ void MeshScene::destroyScene()
 	SAFE_DELETE(mCubeObject);
 }
 
-void MeshScene::onFrameStart(Event*)
+void MeshScene::onFrameStart(FrameEvent*)
 {
 	mDebug0 += 0.001f;
 	mDebug1 += 0.01f;
@@ -128,6 +134,6 @@ void MeshScene::onFrameStart(Event*)
 	mMainCamera->yaw(mDebug1);
 }
 
-void MeshScene::onFrameEnd(Event*)
+void MeshScene::onFrameEnd(FrameEvent*)
 {
 }

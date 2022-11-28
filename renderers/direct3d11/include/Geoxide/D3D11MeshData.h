@@ -14,7 +14,6 @@ namespace Geoxide {
 		ComPtr<ID3D11Buffer> indexBuffer;
 		uint32_t vertexStride;
 		DXGI_FORMAT indexFormat;
-		GX_DECLARE_LOG("D3D11MeshData");
 	};
 
 }

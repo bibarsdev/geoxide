@@ -19,6 +19,7 @@ namespace Geoxide {
 		kEventMouseButtonDown,
 		kEventMouseWheel,
 		kEventMouseMoved,
+		kEventFrame,
 	};
 
 	class Event

@@ -12,7 +12,6 @@ namespace Geoxide {
 
 		ComPtr<ID3D11RenderTargetView> rtv;
 		D3D11_VIEWPORT vp;
-		GX_DECLARE_LOG("D3D11RenderTarget");
 	};
 
 }

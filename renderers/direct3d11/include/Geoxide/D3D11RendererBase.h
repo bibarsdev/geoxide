@@ -4,6 +4,8 @@
 
 #include <Geoxide/Renderer.h>
 
+#include <d3dcompiler.h>
+
 namespace Geoxide {
 
 	class D3D11RendererBase
@@ -28,18 +30,17 @@ namespace Geoxide {
 		D3D11RendererBase(HWND window);
 		~D3D11RendererBase();
 
-		bool createShaderResource(ID3D11Resource* resource, D3D11_SRV_DIMENSION type, DXGI_FORMAT format, ID3D11ShaderResourceView** outSRV,
+		void createShaderResource(ID3D11Resource* resource, D3D11_SRV_DIMENSION type, DXGI_FORMAT format, ID3D11ShaderResourceView** outSRV,
 			UINT mostDetailedMip_FirstElement, UINT mipLevels_NumElements, UINT firstArraySlice_First2DArrayFace, UINT arraySize_NumCubes);
-		bool createTexture2D(UINT width, UINT height, const void* data, UINT arraySize, UINT mips, DXGI_FORMAT format, ID3D11Texture2D** outTexture,
+		void createTexture2D(UINT width, UINT height, const void* data, UINT arraySize, UINT mips, DXGI_FORMAT format, ID3D11Texture2D** outTexture,
 			ID3D11ShaderResourceView** outSRV, bool renderTargetBindable, bool depthStencilBindable, bool enableRead, bool enableWrite);
-		bool createRenderTargetView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11RenderTargetView** outRenderTarget, D3D11_VIEWPORT* outViewport);
-		bool createDepthStencilView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11DepthStencilView** outDepthStencil);
-		bool createShader(const void* codeBuffer, SIZE_T codeSize, const char* entryPoint, const char* type, bool isCompiled,
-			ID3D11DeviceChild** outShader, ID3D11InputLayout** outInputLayout);
-		bool createInputLayout(const D3D11_INPUT_ELEMENT_DESC* elements, UINT numElements, 
-			const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout);
-		bool generateInputLayout(const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout);
-		bool createBuffer(UINT stride, UINT size, const void* data, D3D11_BIND_FLAG bindFlag,
+		void createRenderTargetView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11RenderTargetView** outRenderTarget, D3D11_VIEWPORT* outViewport);
+		void createDepthStencilView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11DepthStencilView** outDepthStencil);
+		void compileShader(const std::string& name, const void* codeBuffer, SIZE_T codeSize, const char* entryPoint, const char* target,
+			ID3DBlob** outBlob);
+		void generateInputLayout(ID3D11ShaderReflection* ref, const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout);
+		void reflectGlobalVariables(ID3D11ShaderReflection* ref, std::unordered_map<std::string, uint32_t>& outMap, uint32_t* globalsBufferSize);
+		void createBuffer(UINT stride, UINT size, const void* data, D3D11_BIND_FLAG bindFlag,
 			ID3D11Buffer** outBuffer, ID3D11ShaderResourceView** outSRV,
 			bool enableRead, bool enableWrite);
 
@@ -54,8 +55,6 @@ namespace Geoxide {
 		static void copy(void* dest, const void* src, UINT numElements, UINT elementLength);
 
 	public:
-		bool hasConstructed;
-
 		ComPtr<ID3D11Device> dev;
 		ComPtr<ID3D11DeviceContext> ctx;
 		ComPtr<IDXGISwapChain> sw;
@@ -91,7 +90,8 @@ namespace Geoxide {
 
 		static ILFormatMap ILFormatDictionary;
 
-		GX_DECLARE_LOG("D3D11Renderer");
+	protected:
+		bool mHasInitialized;
 	};
 
 }

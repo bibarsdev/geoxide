@@ -20,39 +20,67 @@ namespace Geoxide {
 	}
 
 	MeshObject::MeshObject(Application* app, Mesh* mesh) :
-		MovableObject(app), mGfx(app->getRenderer()), mMesh(mesh) {}
+		MovableObject(app), mGfx(app->getRenderer()), mMesh(mesh), 
+		mVSData(app->getSharedBuffer()),
+		mPSData(app->getSharedBuffer() + SHARED_BUFFER_SIZE / 2) {}
 
 	void MeshObject::update(Object* _parent)
 	{
 		MovableObject::update(_parent);
 
-		DrawInput mDrawInput;
+		MatrixConst world = getWorldMatrix();
+		Matrix worldViewProj = MatrixMultiply(world, mApp->getViewProjMatrix());
+		float time = mApp->getTime();
 
-		mDrawInput.meshData = mMesh->getMeshData();
-		mDrawInput.topology = kPrimitiveTopologyTriangleList;
+		DrawInput drawInput;
+
+		drawInput.meshData = mMesh->getMeshData();
+		drawInput.topology = kPrimitiveTopologyTriangleList;
 
 		for (auto& subMesh : mMesh->getSubMeshes())
 		{
 			Material* material = subMesh.material;
-			Matrix WorldViewProj = MatrixMultiply(getWorldMatrix(), mApp->getViewProjMatrix());
 
-			WorldViewProj = MatrixTranspose(WorldViewProj);
-				
-			mDrawInput.vsUniformData = &WorldViewProj;
-			mDrawInput.vsUniformDataSize = sizeof(WorldViewProj);
+			uint32_t VSDataSize = material->getVSDataSize();
+			uint32_t PSDataSize = material->getPSDataSize();
 
-			mDrawInput.psUniformData = 0;
-			mDrawInput.psUniformDataSize = 0;
+			uint32_t worldViewProjOffset = material->getWorldViewProjOffset();
+			uint32_t worldOffset = material->getWorldOffset();
+			uint32_t timeOffset = material->getTimeOffset();
 
-			mDrawInput.program = material->getGpuProgram();
+			if (worldViewProjOffset != -1)
+			{
+				Matrix& worldViewProjUniform = (Matrix&)mVSData[worldViewProjOffset];
+				worldViewProjUniform = worldViewProj;
+			}
 
-			mDrawInput.textures = material->getTextures().data();
-			mDrawInput.numTextures = material->getTextures().size();
+			if (worldOffset != -1)
+			{
+				Matrix& worldUniform = (Matrix&)mVSData[worldOffset];
+				worldUniform = world;
+			}
 
-			mDrawInput.indexStart = subMesh.indexStart;
-			mDrawInput.indexCount = subMesh.indexCount;
+			if (timeOffset != -1)
+			{
+				float& timeUniform = (float&)mPSData[timeOffset];
+				timeUniform = time;
+			}
 
-			mGfx->draw(mDrawInput);
+			drawInput.vsUniformData = mVSData;
+			drawInput.vsUniformDataSize = VSDataSize;
+
+			drawInput.psUniformData = mPSData;
+			drawInput.psUniformDataSize = PSDataSize;
+
+			drawInput.program = material->getGpuProgram();
+
+			drawInput.textures = material->getTextures().data();
+			drawInput.numTextures = material->getTextures().size();
+
+			drawInput.indexStart = subMesh.indexStart;
+			drawInput.indexCount = subMesh.indexCount;
+
+			mGfx->draw(drawInput);
 		}
 	}
 

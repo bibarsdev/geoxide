@@ -23,8 +23,17 @@ V2P vertex(A2V v)
 	return o;
 }
 
+float gTime;
+
 float4 pixel(V2P p) : SV_TARGET0
 {
-	float4 o = p.color;
+	float4 o;
+	
+	// Just messing around
+	float timeSin = sin(gTime);
+	float timeCos = cos(gTime);
+	
+	o = float4(p.color.r * timeCos, p.color.g * timeSin, p.color.b * ((timeCos + timeSin) / 2.0), p.color.a);
+	
 	return o;
 }

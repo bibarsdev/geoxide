@@ -31,7 +31,6 @@ namespace Geoxide {
 		SDL_Window* mWindow;
 		bool mVisible;
 		inline static bool sSDLInitialized = false;
-		GX_DECLARE_LOG("SDLWindow");
 	};
 }
 

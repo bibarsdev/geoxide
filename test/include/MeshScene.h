@@ -15,8 +15,8 @@ public:
 	void prepareScene() override;
 	void destroyScene() override;
 
-	void onFrameStart(Event*) override;
-	void onFrameEnd(Event*) override;
+	void onFrameStart(FrameEvent*) override;
+	void onFrameEnd(FrameEvent*) override;
 
 protected:
 	MeshData* mCubeMeshData;

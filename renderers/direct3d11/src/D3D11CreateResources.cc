@@ -1,9 +1,7 @@
 
-#include <d3dcompiler.h>
-
 namespace Geoxide {
 
-	bool D3D11RendererBase::createShaderResource(ID3D11Resource* resource, D3D11_SRV_DIMENSION type, DXGI_FORMAT format, ID3D11ShaderResourceView** outSRV,
+	void D3D11RendererBase::createShaderResource(ID3D11Resource* resource, D3D11_SRV_DIMENSION type, DXGI_FORMAT format, ID3D11ShaderResourceView** outSRV,
 		UINT mostDetailedMip_FirstElement, UINT mipLevels_NumElements, UINT firstArraySlice_First2DArrayFace, UINT arraySize_NumCubes)
 	{
 		HRESULT hr;
@@ -16,12 +14,10 @@ namespace Geoxide {
 		hr = dev->CreateShaderResourceView(resource, &srDesc, outSRV);
 
 		if (FAILED(hr))
-			return false;
-
-		return true;
+			GX_FUNC_THROW("Failed to create ID3D11ShaderResourceView. " + GetFormattedMessage(hr));
 	}
 
-	bool D3D11RendererBase::createTexture2D(UINT width, UINT height, const void* data, UINT arraySize, UINT mips, DXGI_FORMAT format,
+	void D3D11RendererBase::createTexture2D(UINT width, UINT height, const void* data, UINT arraySize, UINT mips, DXGI_FORMAT format,
 		ID3D11Texture2D** outTexture, ID3D11ShaderResourceView** outSRV, bool renderTargetBindable, bool depthStencilBindable, bool enableRead, bool enableWrite)
 	{
 		HRESULT hr;
@@ -56,18 +52,16 @@ namespace Geoxide {
 			hr = dev->CreateTexture2D(&texDesc, 0, outTexture);
 
 		if (FAILED(hr))
-			return false;
+			GX_FUNC_THROW("Failed to create ID3D11Texture2D. " + GetFormattedMessage(hr));
 
 		if (outSRV)
-			return createShaderResource(*outTexture,
+			createShaderResource(*outTexture,
 				(arraySize > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DARRAY : D3D11_SRV_DIMENSION_TEXTURE2D),
 				format, outSRV,
 				0, mips, 0, arraySize);
-
-		return true;
 	}
 
-	bool D3D11RendererBase::createRenderTargetView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11RenderTargetView** outRenderTarget, D3D11_VIEWPORT* outViewport)
+	void D3D11RendererBase::createRenderTargetView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11RenderTargetView** outRenderTarget, D3D11_VIEWPORT* outViewport)
 	{
 		HRESULT hr;
 		D3D11_RESOURCE_DIMENSION rd = D3D11_RESOURCE_DIMENSION_UNKNOWN;
@@ -75,7 +69,7 @@ namespace Geoxide {
 
 		texture->GetType(&rd);
 		if (rd != D3D11_RESOURCE_DIMENSION_TEXTURE2D)
-			return false;
+			GX_FUNC_THROW("Unsupported resource dimension. Only D3D11_RESOURCE_DIMENSION_TEXTURE2D is supported");
 
 		texture->GetDesc(&desc);
 
@@ -86,15 +80,13 @@ namespace Geoxide {
 		hr = dev->CreateRenderTargetView(texture, &rtDesc, outRenderTarget);
 
 		if (FAILED(hr))
-			return false;
+			GX_FUNC_THROW("Failed to create ID3D11RenderTargetView. " + GetFormattedMessage(hr));
 
 		if (outViewport)
 			*outViewport = CD3D11_VIEWPORT((ID3D11Texture2D*)texture, *outRenderTarget);
-
-		return true;
 	}
 
-	bool D3D11RendererBase::createDepthStencilView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11DepthStencilView** outDepthStencil)
+	void D3D11RendererBase::createDepthStencilView(ID3D11Texture2D* texture, UINT arrayIndex, ID3D11DepthStencilView** outDepthStencil)
 	{
 		HRESULT hr;
 		D3D11_RESOURCE_DIMENSION rd = D3D11_RESOURCE_DIMENSION_UNKNOWN;
@@ -102,7 +94,7 @@ namespace Geoxide {
 
 		texture->GetType(&rd);
 		if (rd != D3D11_RESOURCE_DIMENSION_TEXTURE2D)
-			return false;
+			GX_FUNC_THROW("Unsupported resource dimension. Only D3D11_RESOURCE_DIMENSION_TEXTURE2D is supported");
 
 		texture->GetDesc(&desc);
 
@@ -114,70 +106,38 @@ namespace Geoxide {
 		hr = dev->CreateDepthStencilView(texture, &dsDesc, outDepthStencil);
 
 		if (FAILED(hr))
-			return false;
-
-		return true;
+			GX_FUNC_THROW("Failed to create ID3D11DepthStencilView. " + GetFormattedMessage(hr));
 	}
-	bool D3D11RendererBase::createShader(const void* codeBuffer, SIZE_T codeSize, const char* entryPoint, const char* type, bool isCompiled,
-		ID3D11DeviceChild** outShader, ID3D11InputLayout** outInputLayout)
+
+	void D3D11RendererBase::compileShader(const std::string& name, const void* codeBuffer, SIZE_T codeSize, const char* entryPoint, const char* target,
+		ID3DBlob** outBlob)
 	{
-		ComPtr<ID3DBlob> bytecode = 0;
-		ComPtr<ID3DBlob> error = 0;
 		HRESULT hr = 0;
 
-		if (!isCompiled)
-		{
-			D3DCompile(codeBuffer, codeSize, 0, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, type, 0, 0, bytecode.GetAddressOf(), error.GetAddressOf());
+		ComPtr<ID3DBlob> errorMsg;
 
-			if (!bytecode)
-				return false;
-
-			codeBuffer = bytecode->GetBufferPointer();
-			codeSize = bytecode->GetBufferSize();
-		}
-
-		switch (type[0])
-		{
-		case 'v':
-			hr = dev->CreateVertexShader(codeBuffer, codeSize, 0, (ID3D11VertexShader**)outShader);
-			break;
-		case 'p':
-			hr = dev->CreatePixelShader(codeBuffer, codeSize, 0, (ID3D11PixelShader**)outShader);
-			break;
-		default:
-			return false;
-			break;
-		}
+		hr = D3DCompile(
+			codeBuffer, codeSize, name.c_str(),
+			0, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			entryPoint, target,
+			D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_PACK_MATRIX_ROW_MAJOR, 0,
+			outBlob, &errorMsg);
 
 		if (FAILED(hr))
-			return false;
+			if (errorMsg)
+			{
+				const char* pMsg = (const char*)errorMsg->GetBufferPointer();
+				std::string sErrorMsg(pMsg, pMsg + errorMsg->GetBufferSize());
 
-		if (outInputLayout)
-			return generateInputLayout(codeBuffer, codeSize, outInputLayout);
-
-		return true;
-	}
-
-	bool D3D11RendererBase::createInputLayout(const D3D11_INPUT_ELEMENT_DESC* elements, UINT numElements, 
-		const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout)
-	{
-		HRESULT hr = dev->CreateInputLayout(elements, numElements, byteCodeBuffer, byteCodeSize, outInputLayout);
-		
-		if (FAILED(hr))
-			return false;
-
-		return true;
+				GX_FUNC_THROW("Failed to compile shader \'" + name + "\' \'" + target + "\'. " + GetFormattedMessage(hr) + ". " + sErrorMsg);
+			}
+			else
+				GX_FUNC_THROW("Failed to compile shader \'" + name + "\' \'" + target + "\'. " + GetFormattedMessage(hr));
 	}
 
 	// copied from https://gist.github.com/Cody-Duncan/d85740563ceea99f6619
-	bool D3D11RendererBase::generateInputLayout(const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout)
+	void D3D11RendererBase::generateInputLayout(ID3D11ShaderReflection* ref, const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout)
 	{
-		ComPtr<ID3D11ShaderReflection> ref;
-		HRESULT hr = D3DReflect(byteCodeBuffer, byteCodeSize, __uuidof(ID3D11ShaderReflection), (void**)ref.GetAddressOf());
-
-		if (FAILED(hr))
-			return false;
-
 		D3D11_SHADER_DESC shaderDesc = {};
 		ref->GetDesc(&shaderDesc);
 
@@ -228,10 +188,40 @@ namespace Geoxide {
 			inputLayoutDesc.push_back(elementDesc);
 		}
 
-		return createInputLayout(inputLayoutDesc.data(), inputLayoutDesc.size(), byteCodeBuffer, byteCodeSize, outInputLayout);
+		HRESULT hr = dev->CreateInputLayout(inputLayoutDesc.data(), inputLayoutDesc.size(), byteCodeBuffer, byteCodeSize, outInputLayout);
+		
+		if (FAILED(hr))
+			GX_FUNC_THROW("Failed to create ID3D11InputLayout. " + GetFormattedMessage(hr));
 	}
 
-	bool D3D11RendererBase::createBuffer(UINT stride, UINT size, const void* data, D3D11_BIND_FLAG bindFlag,
+	void D3D11RendererBase::reflectGlobalVariables(ID3D11ShaderReflection* ref, std::unordered_map<std::string, uint32_t>& outMap, uint32_t* globalsBufferSize)
+	{
+		D3D11_SHADER_DESC shaderDesc = {};
+		ref->GetDesc(&shaderDesc);
+		
+		auto globalBuffer = ref->GetConstantBufferByName("$Globals");
+
+		D3D11_SHADER_BUFFER_DESC bufferDesc = {};
+		globalBuffer->GetDesc(&bufferDesc);
+
+		if (!bufferDesc.Name)
+			return;
+
+		if (globalsBufferSize)
+			*globalsBufferSize = bufferDesc.Size;
+
+		for (uint32_t i = 0; i < bufferDesc.Variables; i++)
+		{
+			auto var = globalBuffer->GetVariableByIndex(i);
+
+			D3D11_SHADER_VARIABLE_DESC varDesc = {};
+			var->GetDesc(&varDesc);
+
+			outMap[varDesc.Name] = varDesc.StartOffset;
+		}
+	}
+
+	void D3D11RendererBase::createBuffer(UINT stride, UINT size, const void* data, D3D11_BIND_FLAG bindFlag,
 		ID3D11Buffer** outBuffer, ID3D11ShaderResourceView** outSRV,
 		bool enableRead, bool enableWrite)
 	{
@@ -254,15 +244,13 @@ namespace Geoxide {
 		hr = dev->CreateBuffer(&bufDesc, &bufData, outBuffer);
 
 		if (FAILED(hr))
-			return false;
+			GX_FUNC_THROW("Failed to create ID3D11Buffer. " + GetFormattedMessage(hr));
 
 		if (outSRV)
-			return createShaderResource(*outBuffer,
+			createShaderResource(*outBuffer,
 				D3D11_SRV_DIMENSION_BUFFER,
 				DXGI_FORMAT_UNKNOWN, outSRV,
 				0, 1, 0, 0);
-
-		return true;
 	}
 
 }

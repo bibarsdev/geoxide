@@ -7,23 +7,15 @@ namespace Geoxide {
 class Log
 {
 public:
-	Log(const std::string& name) : mName(name) {}
+	static void Init(const std::string& name);
 
-	void info(const std::string& msg);
-	void trace(const std::string& msg);
-	void warning(const std::string& msg);
-	void error(const std::string& msg);
-	void fatal(const std::string& msg);
-
-private:
-	void log(const std::string& type, const std::string& msg);
-
-private:
-	std::string mName;
+	static void Info(const std::string& msg);
+	static void Trace(const std::string& msg);
+	static void Warning(const std::string& msg);
+	static void Error(const std::string& msg);
+	static void Fatal(const std::string& msg);
 };
 
 }
-
-#define GX_DECLARE_LOG(name) inline static Log sLog = Log(name)
 
 #endif // !__GX_LOGGING_H__

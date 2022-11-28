@@ -136,8 +136,7 @@ namespace Geoxide {
 			return 1;
 
 		default:
-			sLog.error("Unknown DXGI format");
-			return 0;
+			GX_FUNC_THROW("Unknown DXGI format");
 		}
 	}
 
@@ -148,8 +147,7 @@ namespace Geoxide {
 		case kColorFormatRGBA32:
 			return DXGI_FORMAT_R8G8B8A8_UNORM;
 		default:
-			sLog.error("Unknown color format");
-			return DXGI_FORMAT_UNKNOWN;
+			GX_FUNC_THROW("Unknown color format");
 		}
 	}
 
@@ -158,10 +156,7 @@ namespace Geoxide {
 		auto& iter = ILFormatDictionary.find({length, type});
 
 		if (iter == ILFormatDictionary.end())
-		{
-			sLog.error("Unknown input layout element format, length=" + std::to_string(length) + ", type=" + std::to_string(type));
-			return DXGI_FORMAT_UNKNOWN;
-		}
+			GX_FUNC_THROW("Unknown input layout element format. length=" + std::to_string(length) + ", type=" + std::to_string(type));
 
 		return iter->second;
 	}
@@ -170,12 +165,13 @@ namespace Geoxide {
 	{
 		switch (elementLength)
 		{
-		default:
 			COPY_CASE(1, char);
 			COPY_CASE(2, short);
 			COPY_CASE(4, int);
 			COPY_CASE(8, long long);
 			COPY_CASE(16, XMVECTOR);
+		default:
+			GX_FUNC_THROW("Unknown element length. elementLength=" + std::to_string(elementLength));
 		}
 	}
 

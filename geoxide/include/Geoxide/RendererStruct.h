@@ -7,27 +7,22 @@
 
 namespace Geoxide {
 
-	struct InputElement
-	{
-		const char* semantic;
-		uint32_t semanticIndex;
-		uint32_t offset, length;
-		DataType type;
-	};
-
 	struct GpuProgramInit
 	{
+		std::string name;
 		struct
 		{
-			const void* byteCode;
-			size_t byteCodeSize;
+			std::string name;
+			const void* code;
+			size_t codeSize;
+			const char* entry;
+			bool isCompiled;
 		} vertex, pixel;
-		const InputElement* inputLayout;
-		uint32_t inputLayoutSize;
 	};
 
 	struct TextureInit
 	{
+		std::string name;
 		TextureType type;
 		const void* pixelData;
 		uint32_t width, height;
@@ -39,6 +34,7 @@ namespace Geoxide {
 
 	struct MeshDataInit
 	{
+		std::string name;
 		const void* vertexData;
 		const void* indexData;
 		uint32_t vertexLength;
@@ -49,6 +45,7 @@ namespace Geoxide {
 
 	struct RenderTargetInit
 	{
+		std::string name;
 		Texture* texture;
 		uint32_t arrayIndex;
 	};

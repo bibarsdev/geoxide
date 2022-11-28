@@ -8,7 +8,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include <windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <wrl/client.h>

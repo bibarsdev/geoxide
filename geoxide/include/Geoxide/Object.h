@@ -55,6 +55,8 @@ namespace Geoxide {
 
 	protected:
 		Renderer* mGfx;
+		uint8_t* mVSData;
+		uint8_t* mPSData;
 		Mesh* mMesh;
 	};
 }

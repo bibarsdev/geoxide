@@ -20,26 +20,25 @@ public:
 	virtual void prepareScene() = 0;
 	virtual void destroyScene() = 0;
 
-	virtual void onFrameStart(Event*) = 0;
-	virtual void onFrameEnd(Event*) = 0;
-
+	virtual void onFrameStart(FrameEvent*) = 0;
+	virtual void onFrameEnd(FrameEvent*) = 0;
+	
 protected:
 	TestApplication* mApp;
 	Renderer* mGfx;
 	Camera* mMainCamera;
-	GX_DECLARE_LOG("Scene");
 };
 
 class TestApplication : public Application
 {
 public:
-	TestApplication() : mCurrentScene(0) {}
+	TestApplication() : mCurrentScene(0), Application("Test Application") {}
 	~TestApplication();
 
 	void start();
 
-	void onFrameStart(Event*) override;
-	void onFrameEnd(Event*) override;
+	void onFrameStart(FrameEvent*) override;
+	void onFrameEnd(FrameEvent*) override;
 	void onKeyUp(KeyUpEvent* e) override;
 
 public:

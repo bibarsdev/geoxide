@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-file(GLOB SHADER_FILES assets/shaders/*.fx)
+file(GLOB SHADER_FILES assets/shaders/*.hlsl)
 file(GLOB SOURCE_FILES src/*.cc)
 
 add_executable				(test ${SOURCE_FILES})

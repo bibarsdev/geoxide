@@ -16,7 +16,7 @@ namespace Geoxide {
 			if (SDL_Init(SDL_INIT_VIDEO) < 0)
 			{
 				std::string SDLError = SDL_GetError();
-				sLog.error("SDL initialization failed! SDLError=\'" + SDLError + "\'");
+				Log::Error("SDL initialization failed! SDLError=\'" + SDLError + "\'");
 				return;
 			}
 			sSDLInitialized = true;
@@ -31,18 +31,18 @@ namespace Geoxide {
 		if (!mWindow)
 		{
 			std::string SDLError = SDL_GetError();
-			sLog.error("Failed to create window \'" + args.title + "\', SDLError=\'" + SDLError + "\'");
+			Log::Error("Failed to create window \'" + args.title + "\', SDLError=\'" + SDLError + "\'");
 		}
 
 		mVisible = false;
 
-		sLog.info("Created a new window");
+		Log::Info("Created new SDLWindow \'" + args.title + "\'");
 
-		sLog.trace("Title: " + std::string(getTitle()));
-		sLog.trace("Client Width: " + std::to_string(getClientWidth()));
-		sLog.trace("Client Height: " + std::to_string(getClientHeight()));
-		sLog.trace("X: " + std::to_string(getX()));
-		sLog.trace("Y: " + std::to_string(getY()));
+		Log::Trace("Title: " + std::string(getTitle()));
+		Log::Trace("Client Width: " + std::to_string(getClientWidth()));
+		Log::Trace("Client Height: " + std::to_string(getClientHeight()));
+		Log::Trace("X: " + std::to_string(getX()));
+		Log::Trace("Y: " + std::to_string(getY()));
 	}
 
 	SDLWindow::~SDLWindow()
@@ -160,7 +160,7 @@ namespace Geoxide {
 			SDL_DestroyWindow(mWindow);
 			mWindow = 0;
 
-			sLog.info("Destroyed window \'" + name + "\'");
+			Log::Info("Destroyed window \'" + name + "\'");
 		}
 	}
 }

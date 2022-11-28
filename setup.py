@@ -18,7 +18,4 @@ status('Downloading third-party dependencies...')
 
 # Clone git repositories
 git_clone_repo('SDL2', 'https://github.com/libsdl-org/SDL.git')
-git_clone_repo('shaderc', 'https://github.com/google/shaderc.git')
 
-# Update shaderc's dependencies
-subprocess.call(['python', 'utils/git-sync-deps'], cwd='thirdparty/shaderc/')

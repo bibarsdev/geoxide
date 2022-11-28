@@ -10,10 +10,6 @@
 #include <unordered_map>
 #include <ctime>
 
-#ifdef GX_PLATFORM_WIN32
-#include <windows.h>
-#endif // GX_PLATFORM_WIN32
-
 #include <Geoxide/Platform.h>
 
 #endif // !__GEOXIDE_PCH_H__

@@ -5,11 +5,17 @@
 #include "MouseEvent.h"
 #include "KeyEvent.h"
 #include "WindowEvent.h"
+#include "FrameEvent.h"
 
 #include "Camera.h"
 #include "Object.h"
 
+#define SHARED_BUFFER_SIZE 2048
+
 namespace Geoxide {
+
+	namespace co = std::chrono;
+	using stdclock = co::steady_clock;
 
 	struct ApplicationInit
 	{
@@ -19,6 +25,7 @@ namespace Geoxide {
 	class Application
 	{
 	public:
+	public:
 		void setBackColor(VectorConst color) { mBackColor = color; }
 
 		Window* getWindow() const { return mWindow; }
@@ -26,9 +33,15 @@ namespace Geoxide {
 		Object* getRootObject() const { return mRootObject; }
 		Camera* getMainCamera() const { return mMainCamera; }
 		MatrixConst getViewProjMatrix() const { return mViewProjMatrix; } // TODO: Add scene manager
+		uint8_t* getSharedBuffer() const { return mSharedBuffer; }
+
+		// Time since application started in seconds
+		float getTime() { 
+			return (float)co::duration_cast<co::milliseconds>(stdclock::now() - mAppStartTime).count() / 1000.f;
+		}
 
 	protected:
-		Application();
+		Application(const std::string& name);
 		virtual ~Application();
 
 		void initialize(const ApplicationInit& args);
@@ -38,8 +51,8 @@ namespace Geoxide {
 
 		void setTraceAllEvents(bool traceAllEvents);
 
-		virtual void onFrameStart(Event*);
-		virtual void onFrameEnd(Event*);
+		virtual void onFrameStart(FrameEvent*);
+		virtual void onFrameEnd(FrameEvent*);
 		virtual void onQuit(Event*);
 		virtual void onWindowClose(Event*); // TODO: Never gets called. Remove or fix later
 		virtual void onWindowResized(WindowResizedEvent*);
@@ -60,6 +73,7 @@ namespace Geoxide {
 		Camera* mMainCamera;
 		Vector mBackColor;
 		Matrix mViewProjMatrix;
+		uint8_t* mSharedBuffer;
 		bool mIsRunning;
 		bool mTraceQuitEvents;
 		bool mTraceWindowCloseEvents;
@@ -73,7 +87,8 @@ namespace Geoxide {
 		bool mTraceMouseButtonDownEvents;
 		bool mTraceMouseWheelEvents;
 		bool mTraceMouseMovedEvents;
-		GX_DECLARE_LOG("Application");
+
+	private:
 
 	private:
 		void initializeWindow(const WindowInit& args);
@@ -86,7 +101,9 @@ namespace Geoxide {
 		std::unordered_map<std::string, std::string> mRenderersPaths; // Contains paths for the renderers' libraries
 		std::vector<std::string> mAvailableRenderers;
 		std::string mCurrentRenderer;
+		std::string mName;
 		SharedLibrary mRendererLib;
+		stdclock::time_point mAppStartTime;
 		bool mHasInitialized;
 	};
 

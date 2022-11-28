@@ -6,9 +6,18 @@
 
 namespace Geoxide {
 
-	Application::Application() : mBackColor(NewVector(0, 0, 0, 1)), mRootObject(new MovableObject(this)), mIsRunning(false), mHasInitialized(false)
+	Application::Application(const std::string& name) : 
+		mName(name),
+		mBackColor(NewVector(0, 0, 0, 1)),
+		mRootObject(new MovableObject(this)),
+		mSharedBuffer(new uint8_t[SHARED_BUFFER_SIZE]),
+		mIsRunning(false),
+		mHasInitialized(false),
+		mAppStartTime(stdclock::now())
 	{
-		sLog.info("Started");
+		Log::Init(name);
+
+		Log::Info("Started application");
 		
 		mTraceQuitEvents = false;
 		mTraceWindowCloseEvents = false;
@@ -26,22 +35,20 @@ namespace Geoxide {
 
 	Application::~Application()
 	{
-		if (mWindow)
-			delete mWindow;
-		if (mGfx)
-			delete mGfx;
-		if (mRootObject)
-			delete mRootObject;
+		if (mWindow) delete mWindow;
+		if (mGfx) delete mGfx;
+		if (mRootObject) delete mRootObject;
+		if (mSharedBuffer) delete mSharedBuffer;
 
 		if (mRendererLib)
 			UnloadSharedLibrary(mRendererLib);
 
-		sLog.info("Ended");
+		Log::Info("Ended application");
 	}
 
 	void Application::initialize(const ApplicationInit& args)
 	{
-		sLog.info("Initializing...");
+		Log::Info("Initializing application...");
 
 		initializeWindow(args.window);
 		initializeRenderer();
@@ -49,7 +56,7 @@ namespace Geoxide {
 
 		mHasInitialized = true;
 
-		sLog.info("Initialized");
+		Log::Info("Initialized application");
 	}
 
 	void Application::initializeWindow(const WindowInit& args)
@@ -70,20 +77,20 @@ namespace Geoxide {
 		loadedLib = LoadSharedLibrary(rendererPath.c_str());
 
 		if (!loadedLib)
-			sLog.fatal("Failed to load shared library \'" + rendererPath + "\'");
+			Log::Fatal("Failed to load shared library \'" + rendererPath + "\'");
 
 		NewRenderer = (NewRendererProc)GetSharedLibraryProc(loadedLib, "NewRenderer");
 
 		if (!NewRenderer)
-			sLog.fatal("Failed to get the procedure \'NewRenderer\' from shared library \'" + rendererPath + "\'");
+			Log::Fatal("Failed to get the procedure \'NewRenderer\' from shared library \'" + rendererPath + "\'");
 
 		mGfx = NewRenderer(mWindow);
 
 		if (!mGfx)
-			sLog.fatal("\'NewRenderer\' returned a null pointer");
+			Log::Fatal("\'NewRenderer\' returned a null pointer");
 
 		if (!mGfx->hasInitialized())
-			sLog.fatal("Renderer failed to initialize");
+			Log::Fatal("Renderer failed to initialize");
 	}
 
 	void Application::initializeMainCamera()
@@ -98,12 +105,17 @@ namespace Geoxide {
 	void Application::startRendering()
 	{
 		if (!mHasInitialized)
-			sLog.fatal("Can't start rendering without initializing first");
+			Log::Fatal("Can't start rendering without initializing first");
 
 		if (!mWindow->getVisibility())
 			mWindow->setVisibility(true);
 
 		mIsRunning = true;
+
+		stdclock::time_point lastTime;
+		stdclock::time_point currentTime;
+		float elapsedTime;
+		FrameEvent frameEv(0);
 
 		while (mIsRunning) {
 
@@ -124,15 +136,21 @@ namespace Geoxide {
 					EVENT_CAST_CASE(MouseWheel);
 					EVENT_CAST_CASE(MouseMoved);
 				default:
-					sLog.error("Captured an unhandled event, type=" + std::to_string(ev->getType()));
+					Log::Error("Captured an unhandled event, type=" + std::to_string(ev->getType()));
 					break;
 				}
 				delete ev;
 			}
 
-			onFrameStart(0);
+			currentTime = stdclock::now();
+			elapsedTime = (float)co::duration_cast<co::milliseconds>(currentTime - lastTime).count() / 1000.f;
+			lastTime = currentTime;
+
+			frameEv.mElapsedTime = elapsedTime;
+
+			onFrameStart(&frameEv);
 			renderOneFrame();
-			onFrameEnd(0);
+			onFrameEnd(&frameEv);
 		}
 	}
 

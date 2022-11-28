@@ -8,8 +8,12 @@ file(GLOB HEADER_FILES include/Geoxide/*.h)
 file(GLOB SOURCE_FILES src/*.cc)
 
 add_library					(geoxide ${SOURCE_FILES})
-target_include_directories	(geoxide PUBLIC include ${SDL2_SOURCE_DIR}/include)
 target_precompile_headers	(geoxide PUBLIC src/pch.h)
+
+target_include_directories	(geoxide PUBLIC 
+	include
+	${shaderc_SOURCE_DIR}/include
+	${SPIRV-Cross_SOURCE_DIR})
 
 if(GX_USE_SDL_WINDOW)
 	file(GLOB SOURCE_FILES src/SDL/*.cc)

@@ -1,51 +1,69 @@
 
 #include "Geoxide/Log.h"
 
+#include <Psapi.h>
+
 namespace Geoxide {
 
-	HANDLE gStdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE gStdHandle = 0;
+	std::string gName = "Geoxide";
 
-	void Log::trace(const std::string& msg)
+	void LogMessage(const std::string& type, const std::string& msg, WORD color)
+	{
+		auto t = std::time(nullptr);
+		auto tm = std::localtime(&t);
+
+		auto timestamp = std::put_time(tm, "[%H:%M:%S]");
+
+		std::cout << timestamp << " [" << gName << "] [";
+
+		SetConsoleTextAttribute(gStdHandle, color);
+		std::cout << type;
+		SetConsoleTextAttribute(gStdHandle, 0x07);
+
+		std::cout << "] " << msg << '\n';
+	}
+
+	void Log::Init(const std::string& name)
+	{
+		gName = name;
+		gStdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	}
+
+	void Log::Trace(const std::string& msg)
 	{
 		// Blue
-		SetConsoleTextAttribute(gStdHandle, 0x03);
-		log("Trace", msg);
+		LogMessage("Trace", msg, 0x03);
 	}
 
-	void Log::info(const std::string& msg)
+	void Log::Info(const std::string& msg)
 	{
-		// Light Gray
-		SetConsoleTextAttribute(gStdHandle, 0x07);
-		log("Info", msg);
+		// Green
+		LogMessage("Info", msg, 0x0A);
 	}
 
-	void Log::warning(const std::string& msg)
+	void Log::Warning(const std::string& msg)
 	{
 		// Yellow
-		SetConsoleTextAttribute(gStdHandle, 0x0E);
-		log("Warning", msg);
+		LogMessage("Warning", msg, 0x0E);
 	}
 
-	void Log::error(const std::string& msg)
+	void Log::Error(const std::string& msg)
 	{
-		// light red
-		SetConsoleTextAttribute(gStdHandle, 0x0C);
-		log("Error", msg);
+		// Light red
+		LogMessage("Error", msg, 0x0C);
 	}
 
-	void Log::fatal(const std::string& msg)
+	void Log::Fatal(const std::string& msg)
 	{
-		// red
-		SetConsoleTextAttribute(gStdHandle, 0x04);
-		log("Fatal", msg);
-
-		// Light Gray
-		SetConsoleTextAttribute(gStdHandle, 0x07);
+		// Red
+		LogMessage("Fatal", msg, 0x04);
 
 		std::cout << "Press any key to exit...";
 		std::cin.get();
 
 		exit(1);
 	}
+
 
 }

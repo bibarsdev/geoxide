@@ -4,42 +4,83 @@
 namespace Geoxide {
 
 	D3D11Renderer::D3D11Renderer(HWND window) :
-		D3D11RendererBase(window) {}
+		D3D11RendererBase(window) {
+	}
 
 	D3D11Renderer::~D3D11Renderer()
 	{
+		Log::Info("Destroyed D3D11Renderer");
 	}
 
 	bool D3D11Renderer::hasInitialized() const
 	{
-		return hasConstructed;
+		return mHasInitialized;
 	}
 
 	GpuProgram* D3D11Renderer::newGpuProgram(const GpuProgramInit& args)
 	{
-		return new D3D11GpuProgram(this, args);
+		try
+		{
+			return new D3D11GpuProgram(this, args);
+		}
+		catch (const std::exception& e)
+		{
+			Log::Error(e.what());
+			Log::Error("Failed to create D3D11GpuProgram");
+		}
+
+		return 0;
 	}
 
 	Texture* D3D11Renderer::newTexture(const TextureInit& args)
 	{
-		switch (args.type)
+		try
 		{
-		case kTextureType2D:
-			return new D3D11Texture2D(this, args);
-		default:
-			sLog.error("Unknown texture type, type=" + std::to_string(args.type));
-			return 0;
+			switch (args.type)
+			{
+			case kTextureType2D:
+				return new D3D11Texture2D(this, args);
+			default:
+				GX_THROW("Unknown texture type. " + std::to_string(args.type));
+			}
 		}
+		catch (const std::exception& e)
+		{
+			Log::Error(e.what());
+			Log::Error("Failed to create D3D11Texture2D");
+		}
+
+		return 0;
 	}
 
 	MeshData* D3D11Renderer::newMeshData(const MeshDataInit& args)
 	{
-		return new D3D11MeshData(this, args);
+		try
+		{
+			return new D3D11MeshData(this, args);
+		}
+		catch (const std::exception& e)
+		{
+			Log::Error(e.what());
+			Log::Error("Failed to create D3D11MeshData");
+		}
+
+		return 0;
 	}
 
 	RenderTarget* D3D11Renderer::newRenderTarget(const RenderTargetInit& args)
 	{
-		return new D3D11RenderTarget(this, args);
+		try
+		{
+			return new D3D11RenderTarget(this, args);
+		}
+		catch (const std::exception& e)
+		{
+			Log::Error(e.what());
+			Log::Error("Failed to create D3D11RenderTarget");
+		}
+
+		return 0;
 	}
 
 	void D3D11Renderer::makePerspectiveMatrix(const PerspectiveMatrixInput& args, Matrix& outMatrix)
@@ -136,6 +177,16 @@ namespace Geoxide {
 
 	D3D11Renderer* NewRenderer(Window* wnd)
 	{
-		return new D3D11Renderer((HWND)wnd->getNativeHandle());
+		try
+		{
+			return new D3D11Renderer((HWND)wnd->getNativeHandle());
+		}
+		catch (const std::exception& e)
+		{
+			Log::Error(e.what());
+			Log::Error("Failed to create D3D11Renderer");
+		}
+
+		return 0;
 	}
 }

@@ -19,18 +19,18 @@ namespace Geoxide {
 		mTraceMouseMovedEvents = traceAllEvents;
 	}
 
-	void Application::onFrameStart(Event*)
+	void Application::onFrameStart(FrameEvent*)
 	{
 	}
 
-	void Application::onFrameEnd(Event*)
+	void Application::onFrameEnd(FrameEvent*)
 	{
 	}
 
 	void Application::onQuit(Event* e)
 	{
 		if (mTraceQuitEvents)
-			sLog.trace("Quit Event");
+			Log::Trace("Quit Event");
 
 		mWindow->destroyWindow();
 
@@ -40,67 +40,67 @@ namespace Geoxide {
 	void Application::onWindowClose(Event* e)
 	{
 		if (mTraceWindowCloseEvents)
-			sLog.trace("Window Close Event");
+			Log::Trace("Window Close Event");
 	}
 
 	void Application::onWindowResized(WindowResizedEvent* e)
 	{
 		if (mTraceWindowResizedEvents)
-			sLog.trace("Window Resized Event: " + std::to_string(e->getWidth()) + ", " + std::to_string(e->getWidth()));
+			Log::Trace("Window Resized Event: " + std::to_string(e->getWidth()) + ", " + std::to_string(e->getWidth()));
 	}
 
 	void Application::onWindowFocus(Event* e)
 	{
 		if (mTraceWindowFocusEvents)
-			sLog.trace("Window Focus Event");
+			Log::Trace("Window Focus Event");
 	}
 
 	void Application::onWindowLostFocus(Event* e)
 	{
 		if (mTraceWindowLostFocusEvents)
-			sLog.trace("Window Lost Focus Event");
+			Log::Trace("Window Lost Focus Event");
 	}
 
 	void Application::onWindowMoved(WindowMovedEvent* e)
 	{
 		if (mTraceWindowMovedEvents)
-			sLog.trace("Window Moved Event: " + std::to_string(e->getX()) + ", " + std::to_string(e->getY()));
+			Log::Trace("Window Moved Event: " + std::to_string(e->getX()) + ", " + std::to_string(e->getY()));
 	}
 
 	void Application::onKeyUp(KeyUpEvent* e)
 	{
 		if (mTraceKeyUpEvents)
-			sLog.trace("Key Up Event: " + std::to_string(e->getKeyCode()));
+			Log::Trace("Key Up Event: " + std::to_string(e->getKeyCode()));
 	}
 
 	void Application::onKeyDown(KeyDownEvent* e)
 	{
 		if (mTraceKeyDownEvents)
-			sLog.trace("Key Down Event: " + std::to_string(e->getKeyCode()) + ", " + std::to_string(e->isRepeat()));
+			Log::Trace("Key Down Event: " + std::to_string(e->getKeyCode()) + ", " + std::to_string(e->isRepeat()));
 	}
 
 	void Application::onMouseButtonUp(MouseButtonUpEvent* e)
 	{
 		if (mTraceMouseButtonUpEvents)
-			sLog.trace("Mouse Button Up Event: " + std::to_string(e->getButton()));
+			Log::Trace("Mouse Button Up Event: " + std::to_string(e->getButton()));
 	}
 
 	void Application::onMouseButtonDown(MouseButtonDownEvent* e)
 	{
 		if (mTraceMouseButtonDownEvents)
-			sLog.trace("Mouse Button Down Event: " + std::to_string(e->getButton()));
+			Log::Trace("Mouse Button Down Event: " + std::to_string(e->getButton()));
 	}
 
 	void Application::onMouseWheel(MouseWheelEvent* e)
 	{
 		if (mTraceMouseWheelEvents)
-			sLog.trace("Mouse Wheel Event: " + std::to_string(e->getDelta()));
+			Log::Trace("Mouse Wheel Event: " + std::to_string(e->getDelta()));
 	}
 
 	void Application::onMouseMoved(MouseMovedEvent* e)
 	{
 		if (mTraceMouseMovedEvents)
-			sLog.trace("Mouse Moved Event: " + 
+			Log::Trace("Mouse Moved Event: " + 
 				std::to_string(e->getX()) + ", " + std::to_string(e->getY()) + ", " +
 				std::to_string(e->getXRel()) + ", " + std::to_string(e->getYRel())
 			);

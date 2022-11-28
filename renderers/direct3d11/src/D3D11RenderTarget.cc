@@ -8,13 +8,9 @@ namespace Geoxide {
 	{
 		D3D11Texture* texture = (D3D11Texture*)args.texture;
 
-		if(!gfx->createRenderTargetView((ID3D11Texture2D*)texture->texture.Get(), args.arrayIndex, rtv.GetAddressOf(), &vp))
-		{
-			sLog.error("Failed to create render target");
-			return;
-		}
+		gfx->createRenderTargetView((ID3D11Texture2D*)texture->texture.Get(), args.arrayIndex, rtv.GetAddressOf(), &vp);
 
-		sLog.info("Created a new render target");
+		Log::Info("Created new D3D11RenderTarget \'" + args.name + "\'");
 	}
 
 }

@@ -2,6 +2,7 @@
 #include "TestApplication.h"
 
 #include "MeshScene.h"
+#include "SandboxScene.h"
 
 Scene::Scene(TestApplication* app) : mApp(app), mGfx(app->getRenderer()), mMainCamera(app->getMainCamera()) {}
 
@@ -14,7 +15,7 @@ TestApplication::~TestApplication()
 void TestApplication::start()
 {
 	ApplicationInit appInit;
-	appInit.window.title = "Test Application";
+	appInit.window.title = "Test";
 	appInit.window.x = GX_WINDOWPOS_CENTERED;
 	appInit.window.y = GX_WINDOWPOS_CENTERED;
 	appInit.window.width = 640;
@@ -24,6 +25,7 @@ void TestApplication::start()
 
 	// initialize scenes
 	mScenes["Mesh"] = new MeshScene(this);
+	mScenes["Sandbox"] = new SandboxScene(this);
 
 	enterAndLoadScene();
 }
@@ -52,7 +54,7 @@ void TestApplication::enterAndLoadScene()
 	for (auto& scene : mScenes)
 		scenesMsg = scenesMsg + " " + scene.first;
 
-	sLog.info(scenesMsg);
+	Log::Info(scenesMsg);
 
 EnterSceneName:
 	std::cout << "Enter scene to load: ";
@@ -64,7 +66,7 @@ EnterSceneName:
 
 	if (iter == mScenes.end())
 	{
-		sLog.error("Unknown Scene \"" + selectedScene + "\"");
+		Log::Error("Unknown Scene \"" + selectedScene + "\"");
 		goto EnterSceneName;
 	}
 
@@ -73,17 +75,17 @@ EnterSceneName:
 
 	mCurrentScene = loadedScene;
 
-	sLog.info("Loaded Scene \"" + selectedScene + "\"");
+	Log::Info("Loaded Scene \"" + selectedScene + "\"");
 
 	startRendering();
 }
 
-void TestApplication::onFrameStart(Event* e)
+void TestApplication::onFrameStart(FrameEvent* e)
 {
 	mCurrentScene->onFrameStart(e);
 }
 
-void TestApplication::onFrameEnd(Event* e)
+void TestApplication::onFrameEnd(FrameEvent* e)
 {
 	mCurrentScene->onFrameEnd(e);
 }

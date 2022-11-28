@@ -11,7 +11,6 @@ namespace Geoxide {
 
 		ComPtr<ID3D11ShaderResourceView> srv;
 		ComPtr<ID3D11Resource> texture;
-		GX_DECLARE_LOG("D3D11Texture");
 	};
 
 	class D3D11Texture2D : public D3D11Texture
