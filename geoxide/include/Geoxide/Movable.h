@@ -7,37 +7,28 @@ namespace Geoxide {
 	class Movable
 	{
 	public:
-		void setPosition(Vector v) { mPosition = v; }
-		void setQuaternion(Vector v) { mQuaternion = v; }
-		void setScaling(Vector v) { mScaling = v; }
+		void setPosition(VectorConst v) { mPosition = v; }
+		void setOrientation(VectorConst v) { mOrientation = v; }
+		void setScaling(VectorConst v) { mScaling = v; }
+		void setPitch(float rad) { VectorXRef(mOrientation) = rad; }
+		void setYaw(float rad) { VectorYRef(mOrientation) = rad; }
+		void setRoll(float rad) { VectorZRef(mOrientation) = rad; }
 
-		Vector getPosition() const { return mPosition; }
-		Vector getQuaternion() const { return mQuaternion; }
-		Vector getScaling() const { return mScaling; }
+		VectorConst getPosition() const { return mPosition; }
+		VectorConst getQuaternion() const { return mOrientation; }
+		VectorConst getScaling() const { return mScaling; }
 
 		MatrixConst getWorldMatrix() const { return mWorldMatrix; }
 
 		void updateWorldMatrix();
 
-		void pitch(float rad) {
-			mQuaternion = NewQuaternionAngleAxis(NewVector(1, 0, 0, rad));
-		}
-
-		void yaw(float rad) {
-			mQuaternion = NewQuaternionAngleAxis(NewVector(0, 1, 0, rad));
-		}
-
-		void roll(float rad) {
-			mQuaternion = NewQuaternionAngleAxis(NewVector(0, 0, 1, rad));
-		}
-
 	protected:
 		Movable() :
-			mPosition(NewVector(0, 0, 0)), mQuaternion(NewQuaternionIdentity()), mScaling(NewVector(1, 1, 1)), mWorldMatrix(NewMatrixIdentity()) {}
+			mPosition(NewVector(0, 0, 0)), mOrientation(NewVector(0, 0, 0)), mScaling(NewVector(1, 1, 1)), mWorldMatrix(NewMatrixIdentity()) {}
 
 	protected:
 		Vector mPosition;
-		Vector mQuaternion;
+		Vector mOrientation;
 		Vector mScaling;
 		Matrix mWorldMatrix;
 	};

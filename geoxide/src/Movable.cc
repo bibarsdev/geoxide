@@ -3,12 +3,13 @@
 
 namespace Geoxide {
 
-	void Movable::updateWorldMatrix() {
+	void Movable::updateWorldMatrix()
+	{
 		Matrix positionMatrix = NewMatrixTranslation(mPosition);
-		Matrix quaternionMatrix = NewMatrixQuaternion(mQuaternion);
+		Matrix rotationMatrix = NewMatrixOrientation(mOrientation);
 		Matrix scalingMatrix = NewMatrixScaling(mScaling);
 
-		mWorldMatrix = MatrixMultiply(positionMatrix, quaternionMatrix);
+		mWorldMatrix = MatrixMultiply(positionMatrix, rotationMatrix);
 		mWorldMatrix = MatrixMultiply(mWorldMatrix, scalingMatrix);
 	}
 

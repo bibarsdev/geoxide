@@ -30,6 +30,11 @@ namespace Geoxide {
 	inline float VectorZ(VectorConst v) { return v.z; }
 	inline float VectorW(VectorConst v) { return v.w; }
 
+	inline float& VectorXRef(Vector& v) { return v.x; }
+	inline float& VectorYRef(Vector& v) { return v.y; }
+	inline float& VectorZRef(Vector& v) { return v.z; }
+	inline float& VectorWRef(Vector& v) { return v.w; }
+
 	inline Vector VectorAdd(VectorConst v1, VectorConst v2)
 	{
 		Vector result;
@@ -176,56 +181,6 @@ namespace Geoxide {
 		return result;
 	}
 
-	inline Matrix NewMatrixTranslation(VectorConst v)
-	{
-		Matrix result;
-
-		result.r[0] = kIdentityRow0;
-		result.r[1] = kIdentityRow1;
-		result.r[2] = kIdentityRow2;
-		result.r[3] = { VectorX(v), VectorY(v), VectorZ(v), 1 };
-
-		return result;
-	}
-
-	inline Matrix NewMatrixQuaternion(VectorConst v)
-	{
-		Matrix result;
-
-		float x = VectorX(v), y = VectorY(v), z = VectorZ(v), w = VectorW(v);
-		float sx = x * x, sy = y * y, sz = z * z;
-
-		result.r[0].x = 1.f - 2 * (sy + sz);
-		result.r[0].y = 2 * (x * y - w * z);
-		result.r[0].z = 2 * (x * z + w * y);
-		result.r[0].w = 0;
-
-		result.r[1].x = 2 * (x * y + w * z);
-		result.r[1].y = 1.f - 2 * (sx + sz);
-		result.r[1].z = 2 * (y * z - w * x);
-		result.r[1].w = 0;
-
-		result.r[2].x = 2 * (x * z - w * y);
-		result.r[2].y = 2 * (y * z + w * x);
-		result.r[2].z = 1.f - 2 * (sx + sy);
-		result.r[2].w = 0;
-
-		result.r[3] = kIdentityRow3;
-
-		return result;
-	}
-
-	inline Matrix NewMatrixScaling(VectorConst v)
-	{
-		Matrix result;
-
-		result.r[0] = { VectorX(v),0,0,0 };
-		result.r[1] = { 0,VectorY(v),0,0 };
-		result.r[2] = { 0,0,VectorZ(v),0 };
-		result.r[3] = kIdentityRow3;
-
-		return result;
-	}
 
 	inline Matrix MatrixMultiply(MatrixConst m1, MatrixConst m)
 	{
@@ -280,6 +235,71 @@ namespace Geoxide {
 		result.r[1].w = m.r[3].y;
 		result.r[2].w = m.r[3].z;
 		result.r[3].w = m.r[3].w;
+
+		return result;
+	}
+
+	inline Matrix NewMatrixTranslation(VectorConst v)
+	{
+		Matrix result;
+
+		result.r[0] = kIdentityRow0;
+		result.r[1] = kIdentityRow1;
+		result.r[2] = kIdentityRow2;
+		result.r[3] = { VectorX(v), VectorY(v), VectorZ(v), 1 };
+
+		return result;
+	}
+
+	inline Matrix NewMatrixQuaternion(VectorConst v)
+	{
+		Matrix result;
+
+		float x = VectorX(v), y = VectorY(v), z = VectorZ(v), w = VectorW(v);
+		float sx = x * x, sy = y * y, sz = z * z;
+
+		result.r[0].x = 1.f - 2 * (sy + sz);
+		result.r[0].y = 2 * (x * y - w * z);
+		result.r[0].z = 2 * (x * z + w * y);
+		result.r[0].w = 0;
+
+		result.r[1].x = 2 * (x * y + w * z);
+		result.r[1].y = 1.f - 2 * (sx + sz);
+		result.r[1].z = 2 * (y * z - w * x);
+		result.r[1].w = 0;
+
+		result.r[2].x = 2 * (x * z - w * y);
+		result.r[2].y = 2 * (y * z + w * x);
+		result.r[2].z = 1.f - 2 * (sx + sy);
+		result.r[2].w = 0;
+
+		result.r[3] = kIdentityRow3;
+
+		return result;
+	}
+
+	inline Matrix NewMatrixOrientation(VectorConst v)
+	{
+		Matrix result;
+
+		Matrix pitchMatrix = NewMatrixQuaternion(NewQuaternionAngleAxis(NewVector(1, 0, 0, VectorX(v))));
+		Matrix yawMatrix = NewMatrixQuaternion(NewQuaternionAngleAxis(NewVector(0, 1, 0, VectorY(v))));
+		Matrix rollMatrix = NewMatrixQuaternion(NewQuaternionAngleAxis(NewVector(0, 0, 1, VectorZ(v))));
+
+		result = MatrixMultiply(pitchMatrix, yawMatrix);
+		result = MatrixMultiply(result, rollMatrix);
+
+		return result;
+	}
+
+	inline Matrix NewMatrixScaling(VectorConst v)
+	{
+		Matrix result;
+
+		result.r[0] = { VectorX(v),0,0,0 };
+		result.r[1] = { 0,VectorY(v),0,0 };
+		result.r[2] = { 0,0,VectorZ(v),0 };
+		result.r[3] = kIdentityRow3;
 
 		return result;
 	}

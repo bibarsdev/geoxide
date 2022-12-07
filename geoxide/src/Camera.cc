@@ -5,12 +5,12 @@ namespace Geoxide {
 
 	void Camera::updateViewMatrix(Renderer* gfx)
 	{
-		Matrix qua = NewMatrixQuaternion(mQuaternion);
+		Matrix rotationMatrix = NewMatrixOrientation(mOrientation);
 		Vector center = NewVector(0, 0, 1);
 		Vector up = NewVector(0, 1, 0);
 
-		center = VectorMultiply(center, qua);
-		up = VectorMultiply(up, qua);
+		center = VectorMultiply(center, rotationMatrix);
+		up = VectorMultiply(up, rotationMatrix);
 
 		LookAtMatrixInput input;
 		input.position = mPosition;

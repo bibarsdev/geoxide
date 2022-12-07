@@ -16,6 +16,11 @@ public:
 	void onFrameStart(FrameEvent*) override;
 	void onFrameEnd(FrameEvent*) override;
 	void onImGui(FrameEvent*) override;
+
+private:
+	Vector mBackColor;
+	Vector mCameraPosition;
+	Vector mCameraOrientation;
 };
 
 #endif
