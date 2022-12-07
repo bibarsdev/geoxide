@@ -98,7 +98,7 @@ namespace Geoxide {
 		mLightBufferStruct.Lights[0].direction = NewVector(0, -1, 0, 0);
 		mLightBufferStruct.Lights[0].intensity = 10;
 
-		mLightBufferStruct.Lights[1].color = NewVector(1, 0, 0, 1);
+		/*mLightBufferStruct.Lights[1].color = NewVector(1, 0, 0, 1);
 		mLightBufferStruct.Lights[1].direction = NewVector(1.f / 3.f, 1.f / 3.f, -1.f / 3.f, 0);
 		mLightBufferStruct.Lights[1].intensity = 10;
 
@@ -108,9 +108,9 @@ namespace Geoxide {
 
 		mLightBufferStruct.Lights[3].color = NewVector(0, 0, 1, 1);
 		mLightBufferStruct.Lights[3].direction = NewVector(0, 1.f / 2.f, 1.f / 2.f, 0);
-		mLightBufferStruct.Lights[3].intensity = 10;
+		mLightBufferStruct.Lights[3].intensity = 10;*/
 
-		mLightBufferStruct.NumLights = 4;
+		mLightBufferStruct.NumLights = 1;
 
 		mLightBuffer->write(&mLightBufferStruct, 0, sizeof(mLightBufferStruct));
 	}

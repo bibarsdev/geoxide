@@ -21,6 +21,12 @@ private:
 	Vector mBackColor;
 	Vector mCameraPosition;
 	Vector mCameraOrientation;
+	Vector mEntityPosition;
+	Vector mEntityOrientation;
+	Vector mEntityScaling;
+	std::unordered_map<std::string, MeshEntity> mEntities;
+	std::vector<const char*> mEntityNames;
+	SceneNode* mNode;
 };
 
 #endif

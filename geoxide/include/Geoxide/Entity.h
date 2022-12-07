@@ -27,6 +27,7 @@ namespace Geoxide {
 	class MeshEntity : public MovableEntity
 	{
 	public:
+		MeshEntity() : mMesh(0) {}
 		MeshEntity(Mesh* mesh) : mMesh(mesh) {}
 		virtual ~MeshEntity() = default;
 		virtual void update(SceneNode* node) override;

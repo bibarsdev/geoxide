@@ -37,8 +37,8 @@ namespace Geoxide {
 	enum CullType
 	{
 		kCullTypeNone,
-		kCullTypeBackFace,
 		kCullTypeFrontFace,
+		kCullTypeBackFace,
 	};
 
 	enum SamplerType
