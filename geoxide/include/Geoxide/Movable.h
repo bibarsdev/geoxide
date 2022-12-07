@@ -7,9 +7,6 @@ namespace Geoxide {
 	class Movable
 	{
 	public:
-		Movable() : 
-			mPosition(NewVector(0, 0, 0)), mQuaternion(NewQuaternionIdentity()), mScaling(NewVector(1, 1, 1)), mWorldMatrix(NewMatrixIdentity()) {}
-
 		void setPosition(Vector v) { mPosition = v; }
 		void setQuaternion(Vector v) { mQuaternion = v; }
 		void setScaling(Vector v) { mScaling = v; }
@@ -33,6 +30,10 @@ namespace Geoxide {
 		void roll(float rad) {
 			mQuaternion = NewQuaternionAngleAxis(NewVector(0, 0, 1, rad));
 		}
+
+	protected:
+		Movable() :
+			mPosition(NewVector(0, 0, 0)), mQuaternion(NewQuaternionIdentity()), mScaling(NewVector(1, 1, 1)), mWorldMatrix(NewMatrixIdentity()) {}
 
 	protected:
 		Vector mPosition;

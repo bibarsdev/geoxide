@@ -10,25 +10,27 @@ namespace Geoxide {
 
 	struct SubMesh
 	{
-		uint32_t indexStart, indexCount;
 		Material* material;
+		uint32_t indexStart, indexCount;
 	};
 
 	class Mesh
 	{
 	public:
-		Mesh() : mMeshData(0) {}
-		Mesh(MeshData* meshData) : mMeshData(meshData) {}
+		Mesh() : mMeshData(0), mSubMeshes(0), mNumSubMeshes(0) {}
 
-		const auto& getSubMeshes() const { return mSubMeshes; }
-		const SubMesh& getSubMesh(uint32_t i) const { return mSubMeshes[i]; }
 		MeshData* getMeshData() const { return mMeshData; }
 
-		void addSubMesh(SubMesh& subMesh) { mSubMeshes.push_back(subMesh); }
+		const SubMesh* getSubMeshes() const { return mSubMeshes; }
+		uint32_t getNumSubMeshes() const { return mNumSubMeshes; }
 
 	private:
-		std::vector<SubMesh> mSubMeshes;
 		MeshData* mMeshData;
+		SubMesh* mSubMeshes;
+		uint32_t mNumSubMeshes;
+
+	private:
+		friend class ResourceManager;
 	};
 
 }

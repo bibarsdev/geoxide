@@ -2,9 +2,6 @@
 #ifndef __GX_RENDERER_H__
 #define __GX_RENDERER_H__
 
-#include "GpuProgram.h"
-#include "Texture.h"
-#include "MeshData.h"
 #include "RenderTarget.h"
 
 #include "RendererStruct.h"
@@ -21,10 +18,9 @@ namespace Geoxide {
 	public:
 		virtual ~Renderer() = default;
 
-		virtual bool hasInitialized() const = 0;
-
 		virtual GpuProgram* newGpuProgram(const GpuProgramInit& args) = 0;
 		virtual Texture* newTexture(const TextureInit& args) = 0;
+		virtual GpuBuffer* newBuffer(const GpuBufferInit& args) = 0;
 		virtual MeshData* newMeshData(const MeshDataInit& args) = 0;
 		virtual RenderTarget* newRenderTarget(const RenderTargetInit& args) = 0;
 

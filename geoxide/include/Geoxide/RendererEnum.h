@@ -20,16 +20,35 @@ namespace Geoxide {
 		kPrimitiveTopologyTriangleList,
 	};
 
-	enum ColorFormat
-	{
-		kColorFormatUnknown,
-		kColorFormatRGBA32,
-	};
-
 	enum TextureType
 	{
 		kTextureTypeUnknown,
 		kTextureType2D,
+	};
+
+	enum BlendType
+	{
+		kBlendTypeOpaque,
+		kBlendTypeAlphaBlend,
+		kBlendTypeAdditive,
+		kBlendTypeNonPremultiplied,
+	};
+
+	enum CullType
+	{
+		kCullTypeNone,
+		kCullTypeBackFace,
+		kCullTypeFrontFace,
+	};
+
+	enum SamplerType
+	{
+		kSamplerTypePointWrap,
+		kSamplerTypePointClamp,
+		kSamplerTypeLinearWrap,
+		kSamplerTypeLinearClamp,
+		kSamplerTypeAnisotropicWrap,
+		kSamplerTypeAnisotropicClamp,
 	};
 }
 

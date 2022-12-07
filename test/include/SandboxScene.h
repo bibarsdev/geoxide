@@ -7,18 +7,14 @@
 class SandboxScene : public Scene
 {
 public:
-	SandboxScene(TestApplication* app) :
-		Scene(app), mColorProgram(0) {}
-	~SandboxScene() { destroyScene(); }
+	SandboxScene(TestApplication* app) : Scene(app) {}
+	~SandboxScene() {}
 
 	void prepareScene() override;
 	void destroyScene() override;
 
 	void onFrameStart(FrameEvent*) override;
 	void onFrameEnd(FrameEvent*) override;
-
-protected:
-	GpuProgram* mColorProgram;
 };
 
 #endif

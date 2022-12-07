@@ -1,7 +1,7 @@
 
 namespace Geoxide {
 
-	D3D11RendererBase::D3D11RendererBase(HWND window) : mHasInitialized(false)
+	D3D11RendererBase::D3D11RendererBase(HWND window)
 	{
 		HRESULT hr = 0;
 
@@ -63,15 +63,6 @@ namespace Geoxide {
 		createSamplerState(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_CLAMP, &comstates.linearClamp);
 		createSamplerState(D3D11_FILTER_ANISOTROPIC, D3D11_TEXTURE_ADDRESS_WRAP, &comstates.anisotropicWrap);
 		createSamplerState(D3D11_FILTER_ANISOTROPIC, D3D11_TEXTURE_ADDRESS_CLAMP, &comstates.anisotropicClamp);
-
-		uint32_t tempDataSize = 1024;
-		std::unique_ptr tempData = std::make_unique<uint8_t>(tempDataSize);
-
-		// Create constant buffers
-		createBuffer(0, 1024, tempData.get(), D3D11_BIND_CONSTANT_BUFFER, vsConstantBuffer.GetAddressOf(), 0, false, true);
-		createBuffer(0, 1024, tempData.get(), D3D11_BIND_CONSTANT_BUFFER, psConstantBuffer.GetAddressOf(), 0, false, true);
-
-		mHasInitialized = true;
 	}
 
 	D3D11RendererBase::~D3D11RendererBase()

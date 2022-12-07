@@ -4,11 +4,16 @@ cmake_minimum_required(VERSION 3.16)
 
 project(geoxide)
 
+file(GLOB SHADER_FILES assets/shaders/*.hlsl)
+file(GLOB MODEL_FILES assets/models/*.model)
+file(GLOB MATERIAL_FILES assets/materials/*.material)
+file(GLOB TEXTURE_FILES assets/textures/*.texture)
+
 file(GLOB HEADER_FILES include/Geoxide/*.h)
 file(GLOB SOURCE_FILES src/*.cc)
 
 add_library					(geoxide ${SOURCE_FILES})
-target_precompile_headers	(geoxide PUBLIC src/pch.h)
+target_precompile_headers	(geoxide PRIVATE src/pch.h)
 
 target_include_directories	(geoxide PUBLIC 
 	include
@@ -20,16 +25,17 @@ if(GX_USE_SDL_WINDOW)
 	target_sources				(geoxide PRIVATE ${SOURCE_FILES})
 	target_include_directories	(geoxide PRIVATE ${SDL2_SOURCE_DIR}/include)
 	target_link_libraries		(geoxide SDL2)
-	install(TARGETS SDL2
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if(WIN32)
 	file(GLOB SOURCE_FILES src/Win32/*.cc)
 	target_sources			(geoxide PRIVATE ${SOURCE_FILES})
 endif()
+
+install(FILES ${SHADER_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR}/assets/shaders)
+install(FILES ${MODEL_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR}/assets/models)
+install(FILES ${MATERIAL_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR}/assets/materials)
+install(FILES ${TEXTURE_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR}/assets/textures)
 
 install(FILES ${HEADER_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Geoxide)
 

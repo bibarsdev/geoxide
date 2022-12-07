@@ -32,7 +32,7 @@ endif()
 
 # Suppress warnings
 if(MSVC)
-	add_compile_options(/wd4267)
+	add_compile_options(/wd4267 /wd4172)
 endif()
 
 # Set platform
@@ -57,4 +57,5 @@ link_libraries(geoxide_util)
 
 add_subdirectory(geoxide)
 add_subdirectory(renderers)
+add_subdirectory(meshconv)
 add_subdirectory(test)

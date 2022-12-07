@@ -1,0 +1,8 @@
+set shader PhongDiffSpec
+
+vec DiffuseColor 0.8 0.8 0.8 1
+vec AmbientColor 0 0 0 1
+vec SpecularColor 0.8 0.8 0.8 1
+float SpecularPower 25
+texture DiffuseTexture link_statue_body
+texture SpecularTexture link_statue_body_sp

@@ -1,36 +1,25 @@
 
 #include "SandboxScene.h"
 
-#include <fstream>
-
 void SandboxScene::prepareScene()
 {
-	std::ifstream colorHLSLFile("assets/shaders/Color.hlsl");
+	mScnMan->setBackColor(NewVector(0.2f, 0.2f, 0.8f, 1));
+	mScnMan->getMainCamera()->setPosition(NewVector(0, 5, 10));
 
-	std::string fileBuffer((std::istreambuf_iterator<char>(colorHLSLFile)), std::istreambuf_iterator<char>());
+	mResMan->loadModel("bunny.model");
+	mResMan->loadModel("lucy.model");
+	mResMan->loadModel("teapot.model");
 
-	colorHLSLFile.close();
+	Mesh* linkStatueMesh = mResMan->loadModel("link_statue.model");
 
-	GpuProgramInit programDesc = {};
+	MeshEntity* linkStatue = new MeshEntity(linkStatueMesh);
 
-	programDesc.name = "Color";
-
-	programDesc.vertex.name = "Color.vertex";
-	programDesc.vertex.code = fileBuffer.c_str();
-	programDesc.vertex.codeSize = fileBuffer.size();
-	programDesc.vertex.entry = "vertex";
-
-	programDesc.pixel.name = "Color.pixel";
-	programDesc.pixel.code = fileBuffer.c_str();
-	programDesc.pixel.codeSize = fileBuffer.size();
-	programDesc.pixel.entry = "pixel";
-
-	mColorProgram = mGfx->newGpuProgram(programDesc);
+	SceneNode* linkStatueNode = mScnMan->getRootNode()->newChild();
+	linkStatueNode->setEntity(linkStatue);
 }
 
 void SandboxScene::destroyScene()
 {
-	SAFE_DELETE(mColorProgram);
 }
 
 void SandboxScene::onFrameStart(FrameEvent*)

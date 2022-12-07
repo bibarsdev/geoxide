@@ -7,38 +7,23 @@
 #include "WindowEvent.h"
 #include "FrameEvent.h"
 
-#include "Camera.h"
-#include "Object.h"
-
-#define SHARED_BUFFER_SIZE 2048
+#include "ResourceManager.h"
+#include "SceneManager.h"
 
 namespace Geoxide {
-
-	namespace co = std::chrono;
-	using stdclock = co::steady_clock;
 
 	struct ApplicationInit
 	{
 		WindowInit window;
+		ResourceManagerInit resMan;
+		SceneManagerInit scnMan;
 	};
 
 	class Application
 	{
 	public:
-	public:
-		void setBackColor(VectorConst color) { mBackColor = color; }
-
-		Window* getWindow() const { return mWindow; }
-		Renderer* getRenderer() const { return mGfx; }
-		Object* getRootObject() const { return mRootObject; }
-		Camera* getMainCamera() const { return mMainCamera; }
-		MatrixConst getViewProjMatrix() const { return mViewProjMatrix; } // TODO: Add scene manager
-		uint8_t* getSharedBuffer() const { return mSharedBuffer; }
-
-		// Time since application started in seconds
-		float getTime() { 
-			return (float)co::duration_cast<co::milliseconds>(stdclock::now() - mAppStartTime).count() / 1000.f;
-		}
+		ResourceManager* getResourceManager() { return &mResMan; }
+		SceneManager* getSceneManager() { return &mScnMan; }
 
 	protected:
 		Application(const std::string& name);
@@ -67,13 +52,9 @@ namespace Geoxide {
 		virtual void onMouseMoved(MouseMovedEvent*);
 
 	protected:
-		Window* mWindow;
-		Renderer* mGfx;
-		Object* mRootObject;
-		Camera* mMainCamera;
-		Vector mBackColor;
-		Matrix mViewProjMatrix;
-		uint8_t* mSharedBuffer;
+		Local<Window> mWindow;
+		ResourceManager mResMan;
+		SceneManager mScnMan;
 		bool mIsRunning;
 		bool mTraceQuitEvents;
 		bool mTraceWindowCloseEvents;
@@ -89,21 +70,7 @@ namespace Geoxide {
 		bool mTraceMouseMovedEvents;
 
 	private:
-
-	private:
-		void initializeWindow(const WindowInit& args);
-		void initializeRenderer();
-		void initializeMainCamera();
-		void renderOneFrame();
-		void updateObjects(Object::BufferIterator& begin, Object::BufferIterator& end, Object* parent);
-
-	private:
-		std::unordered_map<std::string, std::string> mRenderersPaths; // Contains paths for the renderers' libraries
-		std::vector<std::string> mAvailableRenderers;
-		std::string mCurrentRenderer;
 		std::string mName;
-		SharedLibrary mRendererLib;
-		stdclock::time_point mAppStartTime;
 		bool mHasInitialized;
 	};
 

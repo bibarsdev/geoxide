@@ -13,7 +13,7 @@ class TestApplication;
 class Scene
 {
 public:
-	Scene() : mApp(0), mGfx(0) {}
+	Scene() : mApp(0), mScnMan(0) {}
 	Scene(TestApplication* app);
 	virtual ~Scene() = default;
 
@@ -25,14 +25,14 @@ public:
 	
 protected:
 	TestApplication* mApp;
-	Renderer* mGfx;
-	Camera* mMainCamera;
+	ResourceManager* mResMan;
+	SceneManager* mScnMan;
 };
 
 class TestApplication : public Application
 {
 public:
-	TestApplication() : mCurrentScene(0), Application("Test Application") {}
+	TestApplication() : mCurrentScene(0), Application("TestApplication") {}
 	~TestApplication();
 
 	void start();

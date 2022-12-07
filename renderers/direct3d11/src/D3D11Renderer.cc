@@ -12,11 +12,6 @@ namespace Geoxide {
 		Log::Info("Destroyed D3D11Renderer");
 	}
 
-	bool D3D11Renderer::hasInitialized() const
-	{
-		return mHasInitialized;
-	}
-
 	GpuProgram* D3D11Renderer::newGpuProgram(const GpuProgramInit& args)
 	{
 		try
@@ -26,7 +21,7 @@ namespace Geoxide {
 		catch (const std::exception& e)
 		{
 			Log::Error(e.what());
-			Log::Error("Failed to create D3D11GpuProgram");
+			Log::Error("Failed to create D3D11GpuProgram \'" + args.name + "\'");
 		}
 
 		return 0;
@@ -47,7 +42,22 @@ namespace Geoxide {
 		catch (const std::exception& e)
 		{
 			Log::Error(e.what());
-			Log::Error("Failed to create D3D11Texture2D");
+			Log::Error("Failed to create D3D11Texture2D \'" + args.name + "\'");
+		}
+
+		return 0;
+	}
+
+	GpuBuffer* D3D11Renderer::newBuffer(const GpuBufferInit& args)
+	{
+		try
+		{
+			return new D3D11GpuBuffer(this, args);
+		}
+		catch (const std::exception& e)
+		{
+			Log::Error(e.what());
+			Log::Error("Failed to create D3D11GpuBuffer \'" + args.name + "\'");
 		}
 
 		return 0;
@@ -62,7 +72,7 @@ namespace Geoxide {
 		catch (const std::exception& e)
 		{
 			Log::Error(e.what());
-			Log::Error("Failed to create D3D11MeshData");
+			Log::Error("Failed to create D3D11MeshData \'" + args.name + "\'");
 		}
 
 		return 0;
@@ -77,7 +87,7 @@ namespace Geoxide {
 		catch (const std::exception& e)
 		{
 			Log::Error(e.what());
-			Log::Error("Failed to create D3D11RenderTarget");
+			Log::Error("Failed to create D3D11RenderTarget \'" + args.name + "\'");
 		}
 
 		return 0;
@@ -127,8 +137,9 @@ namespace Geoxide {
 		D3D11MeshData* meshData = (D3D11MeshData*)args.meshData;
 
 		std::unique_ptr<ID3D11ShaderResourceView*> shaderResources(new ID3D11ShaderResourceView*[args.numTextures]);
+		std::unique_ptr<ID3D11Buffer*> VSBuffers(new ID3D11Buffer* [args.numVSBuffers]);
+		std::unique_ptr<ID3D11Buffer*> PSBuffers(new ID3D11Buffer* [args.numPSBuffers]);
 
-		D3D11_MAPPED_SUBRESOURCE mappedResource = {};
 		UINT bufferOffset = 0;
 
 		ctx->IASetVertexBuffers(0, 1, meshData->vertexBuffer.GetAddressOf(), &meshData->vertexStride, &bufferOffset);
@@ -139,17 +150,6 @@ namespace Geoxide {
 
 		ctx->IASetInputLayout(program->inputLayout.Get());
 
-		ctx->Map(vsConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		copy(mappedResource.pData, args.vsUniformData, args.vsUniformDataSize, 1);
-		ctx->Unmap(vsConstantBuffer.Get(), 0);
-
-		ctx->Map(psConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		copy(mappedResource.pData, args.psUniformData, args.psUniformDataSize, 1);
-		ctx->Unmap(psConstantBuffer.Get(), 0);
-
-		ctx->VSSetConstantBuffers(0, 1, vsConstantBuffer.GetAddressOf());
-		ctx->PSSetConstantBuffers(0, 1, psConstantBuffer.GetAddressOf());
-
 		for (uint32_t i = 0; i < args.numTextures; i++)
 		{
 			D3D11Texture* texture = (D3D11Texture*)args.textures[i];
@@ -157,6 +157,21 @@ namespace Geoxide {
 		}
 
 		ctx->PSSetShaderResources(0, args.numTextures, shaderResources.get());
+
+		for (uint32_t i = 0; i < args.numVSBuffers; i++)
+		{
+			D3D11GpuBuffer* buffer = (D3D11GpuBuffer*)args.VSBuffers[i];
+			VSBuffers.get()[i] = buffer->buffer.Get();
+		}
+
+		for (uint32_t i = 0; i < args.numPSBuffers; i++)
+		{
+			D3D11GpuBuffer* buffer = (D3D11GpuBuffer*)args.PSBuffers[i];
+			PSBuffers.get()[i] = buffer->buffer.Get();
+		}
+
+		ctx->VSSetConstantBuffers(0, args.numVSBuffers, VSBuffers.get());
+		ctx->PSSetConstantBuffers(0, args.numPSBuffers, PSBuffers.get());
 
 		switch (args.topology)
 		{
@@ -172,10 +187,15 @@ namespace Geoxide {
 			break;
 		}
 
+		ctx->OMSetBlendState(*((ID3D11BlendState**)(&comstates.opaque) + args.state.blend), 0, 0xFFFFFFFF);
+		ctx->OMSetDepthStencilState(*((ID3D11DepthStencilState**)(&comstates.depthNone) + args.state.zWrite), 0);
+		ctx->RSSetState(*((ID3D11RasterizerState**)(&comstates.cullNone) + args.state.cull));
+		ctx->PSSetSamplers(0, 1, ((ID3D11SamplerState**)(&comstates.pointWrap) + args.state.cull));
+
 		ctx->DrawIndexed(args.indexCount, args.indexStart, 0);
 	}
 
-	D3D11Renderer* NewRenderer(Window* wnd)
+	Renderer* NewRenderer(Window* wnd)
 	{
 		try
 		{

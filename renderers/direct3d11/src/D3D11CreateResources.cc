@@ -43,7 +43,7 @@ namespace Geoxide {
 		{
 			D3D11_SUBRESOURCE_DATA texData;
 			texData.pSysMem = data;
-			texData.SysMemPitch = width * bytesPerPixel(format);
+			texData.SysMemPitch = (width * bitsPerPixel(format) + 7) / 8;
 			texData.SysMemSlicePitch = texData.SysMemPitch * height;
 
 			hr = dev->CreateTexture2D(&texDesc, &texData, outTexture);
@@ -129,7 +129,7 @@ namespace Geoxide {
 				const char* pMsg = (const char*)errorMsg->GetBufferPointer();
 				std::string sErrorMsg(pMsg, pMsg + errorMsg->GetBufferSize());
 
-				GX_FUNC_THROW("Failed to compile shader \'" + name + "\' \'" + target + "\'. " + GetFormattedMessage(hr) + ". " + sErrorMsg);
+				GX_FUNC_THROW("Failed to compile shader \'" + name + "\' \'" + target + "\'. " + sErrorMsg);
 			}
 			else
 				GX_FUNC_THROW("Failed to compile shader \'" + name + "\' \'" + target + "\'. " + GetFormattedMessage(hr));
@@ -194,34 +194,7 @@ namespace Geoxide {
 			GX_FUNC_THROW("Failed to create ID3D11InputLayout. " + GetFormattedMessage(hr));
 	}
 
-	void D3D11RendererBase::reflectGlobalVariables(ID3D11ShaderReflection* ref, std::unordered_map<std::string, uint32_t>& outMap, uint32_t* globalsBufferSize)
-	{
-		D3D11_SHADER_DESC shaderDesc = {};
-		ref->GetDesc(&shaderDesc);
-		
-		auto globalBuffer = ref->GetConstantBufferByName("$Globals");
-
-		D3D11_SHADER_BUFFER_DESC bufferDesc = {};
-		globalBuffer->GetDesc(&bufferDesc);
-
-		if (!bufferDesc.Name)
-			return;
-
-		if (globalsBufferSize)
-			*globalsBufferSize = bufferDesc.Size;
-
-		for (uint32_t i = 0; i < bufferDesc.Variables; i++)
-		{
-			auto var = globalBuffer->GetVariableByIndex(i);
-
-			D3D11_SHADER_VARIABLE_DESC varDesc = {};
-			var->GetDesc(&varDesc);
-
-			outMap[varDesc.Name] = varDesc.StartOffset;
-		}
-	}
-
-	void D3D11RendererBase::createBuffer(UINT stride, UINT size, const void* data, D3D11_BIND_FLAG bindFlag,
+	void D3D11RendererBase::createBuffer(UINT stride, UINT size, const void* data, UINT bindFlags,
 		ID3D11Buffer** outBuffer, ID3D11ShaderResourceView** outSRV,
 		bool enableRead, bool enableWrite)
 	{
@@ -235,7 +208,7 @@ namespace Geoxide {
 		bufDesc.CPUAccessFlags =
 			(enableRead ? D3D11_CPU_ACCESS_READ : 0) |
 			(enableWrite ? D3D11_CPU_ACCESS_WRITE : 0);
-		bufDesc.BindFlags = bindFlag |
+		bufDesc.BindFlags = bindFlags |
 			(outSRV ? D3D11_BIND_SHADER_RESOURCE : 0);
 
 		D3D11_SUBRESOURCE_DATA bufData = {};

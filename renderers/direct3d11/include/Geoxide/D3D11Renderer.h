@@ -4,6 +4,7 @@
 
 #include "D3D11GpuProgram.h"
 #include "D3D11Texture.h"
+#include "D3D11GpuBuffer.h"
 #include "D3D11MeshData.h"
 #include "D3D11RenderTarget.h"
 
@@ -15,10 +16,9 @@ namespace Geoxide {
 		D3D11Renderer(HWND window);
 		~D3D11Renderer();
 
-		bool hasInitialized() const override;
-
 		GpuProgram* newGpuProgram(const GpuProgramInit& args) override;
 		Texture* newTexture(const TextureInit& args) override;
+		GpuBuffer* newBuffer(const GpuBufferInit& args) override;
 		MeshData* newMeshData(const MeshDataInit& args) override;
 		RenderTarget* newRenderTarget(const RenderTargetInit& args) override;
 
@@ -32,7 +32,7 @@ namespace Geoxide {
 		void draw(const DrawInput& args) override;
 	};
 	
-	extern "C" GXAPI D3D11Renderer* NewRenderer(Window* wnd);
+	extern "C" GXAPI Renderer* NewRenderer(Window* wnd);
 
 }
 

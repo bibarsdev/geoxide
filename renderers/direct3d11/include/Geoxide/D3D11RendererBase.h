@@ -11,7 +11,44 @@ namespace Geoxide {
 	class D3D11RendererBase
 	{
 	public:
+		using FormatKey = ColorFormat;
 		using ILFormatKey = std::pair<uint32_t, DataType>;
+
+		struct FormatKeyHash
+		{
+			size_t operator()(const FormatKey& p) const
+			{
+				auto hash = std::hash<uint32_t>{}(p.bitCount);
+				hash ^= std::hash<uint32_t>{}(p.fourCC);
+				hash ^= std::hash<uint32_t>{}(p.RMask);
+				hash ^= std::hash<uint32_t>{}(p.GMask);
+				hash ^= std::hash<uint32_t>{}(p.BMask);
+				hash ^= std::hash<uint32_t>{}(p.AMask);
+
+				return hash;
+			}
+		};
+		
+		struct FormatKeyEqual
+		{
+			bool operator()(const FormatKey& _Left, const FormatKey& _Right) const {
+
+				if (_Left.bitCount != _Right.bitCount)
+					return false;
+				if (_Left.fourCC != _Right.fourCC)
+					return false;
+				if (_Left.RMask != _Right.RMask)
+					return false;
+				if (_Left.GMask != _Right.GMask)
+					return false;
+				if (_Left.BMask != _Right.BMask)
+					return false;
+				if (_Left.AMask != _Right.AMask)
+					return false;
+
+				return true;
+			}
+		};
 
 		struct ILFormatKeyHash
 		{
@@ -24,6 +61,7 @@ namespace Geoxide {
 			}
 		};
 
+		using FormatMap = std::unordered_map<FormatKey, DXGI_FORMAT, FormatKeyHash, FormatKeyEqual>;
 		using ILFormatMap = std::unordered_map<ILFormatKey, DXGI_FORMAT, ILFormatKeyHash>;
 
 	public:
@@ -39,8 +77,7 @@ namespace Geoxide {
 		void compileShader(const std::string& name, const void* codeBuffer, SIZE_T codeSize, const char* entryPoint, const char* target,
 			ID3DBlob** outBlob);
 		void generateInputLayout(ID3D11ShaderReflection* ref, const void* byteCodeBuffer, SIZE_T byteCodeSize, ID3D11InputLayout** outInputLayout);
-		void reflectGlobalVariables(ID3D11ShaderReflection* ref, std::unordered_map<std::string, uint32_t>& outMap, uint32_t* globalsBufferSize);
-		void createBuffer(UINT stride, UINT size, const void* data, D3D11_BIND_FLAG bindFlag,
+		void createBuffer(UINT stride, UINT size, const void* data, UINT bindFlags,
 			ID3D11Buffer** outBuffer, ID3D11ShaderResourceView** outSRV,
 			bool enableRead, bool enableWrite);
 
@@ -49,8 +86,8 @@ namespace Geoxide {
 		void createRasterizerState(D3D11_CULL_MODE cullMode, D3D11_FILL_MODE fillMode, ID3D11RasterizerState** pResult);
 		void createSamplerState(D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE addressMode, ID3D11SamplerState** pResult);
 
-		static UINT bytesPerPixel(DXGI_FORMAT fmt);
-		static DXGI_FORMAT translateFormat(ColorFormat format);
+		static UINT bitsPerPixel(DXGI_FORMAT fmt);
+		static DXGI_FORMAT translateFormat(const ColorFormat& format);
 		static DXGI_FORMAT getInputLayoutFormat(uint32_t length, DataType type);
 		static void copy(void* dest, const void* src, UINT numElements, UINT elementLength);
 
@@ -60,8 +97,6 @@ namespace Geoxide {
 		ComPtr<IDXGISwapChain> sw;
 		ComPtr<ID3D11RenderTargetView> rtv;
 		ComPtr<ID3D11DepthStencilView> dsv;
-		ComPtr<ID3D11Buffer> vsConstantBuffer;
-		ComPtr<ID3D11Buffer> psConstantBuffer;
 
 		D3D11_VIEWPORT vp;
 
@@ -88,10 +123,8 @@ namespace Geoxide {
 			ID3D11SamplerState* anisotropicClamp;
 		} comstates;
 
+		static FormatMap formatDictionary;
 		static ILFormatMap ILFormatDictionary;
-
-	protected:
-		bool mHasInitialized;
 	};
 
 }

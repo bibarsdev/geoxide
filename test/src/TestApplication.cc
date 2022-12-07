@@ -1,10 +1,9 @@
 
 #include "TestApplication.h"
 
-#include "MeshScene.h"
 #include "SandboxScene.h"
 
-Scene::Scene(TestApplication* app) : mApp(app), mGfx(app->getRenderer()), mMainCamera(app->getMainCamera()) {}
+Scene::Scene(TestApplication* app) : mApp(app), mResMan(mApp->getResourceManager()), mScnMan(mApp->getSceneManager()) {}
 
 TestApplication::~TestApplication()
 {
@@ -20,11 +19,14 @@ void TestApplication::start()
 	appInit.window.y = GX_WINDOWPOS_CENTERED;
 	appInit.window.width = 640;
 	appInit.window.height = 480;
+	appInit.resMan.shadersDir = "assets/shaders/";
+	appInit.resMan.materialsDir = "assets/materials/";
+	appInit.resMan.modelsDir = "assets/models/";
+	appInit.resMan.texturesDir = "assets/textures/";
 
 	initialize(appInit);
 
 	// initialize scenes
-	mScenes["Mesh"] = new MeshScene(this);
 	mScenes["Sandbox"] = new SandboxScene(this);
 
 	enterAndLoadScene();
@@ -38,8 +40,12 @@ void TestApplication::onKeyUp(KeyUpEvent* e)
 	{
 	case kKeyCodeEscape:
 		stopRendering();
+
 		mCurrentScene->destroyScene();
-		mRootObject->clearChildren();
+
+		mScnMan.getRootNode()->clearChildren();
+		mResMan.freeAllResources();
+
 		enterAndLoadScene();
 		break;
 	default:

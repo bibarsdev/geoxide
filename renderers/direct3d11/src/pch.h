@@ -17,9 +17,7 @@ namespace Geoxide {
 	using namespace Microsoft::WRL;
 }
 
-#include <Geoxide/Platform.h>
-#include <Geoxide/Log.h>
-#include <Geoxide/Math3D.h>
+#include <Geoxide/Base.h>
 
 #include "Geoxide/D3D11RendererBase.h"
 

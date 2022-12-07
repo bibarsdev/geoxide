@@ -5,17 +5,12 @@
 #include <iostream>
 #include <filesystem>
 #include <chrono>
+#include <fstream>
 
 #include <string>
 #include <vector>
 #include <unordered_map>
 
-#ifdef GX_PLATFORM_WIN32
-#include <windows.h>
-#endif // GX_PLATFORM_WIN32
-
-#include <Geoxide/Log.h>
-#include <Geoxide/Platform.h>
-#include <Geoxide/Math3D.h>
+#include <Geoxide/Base.h>
 
 #endif // !__GEOXIDE_PCH_H__

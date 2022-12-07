@@ -17,12 +17,12 @@ namespace Geoxide {
 
 		switch (args.indexLength)
 		{
+		default:
+		case 4:
+			indexFormat = DXGI_FORMAT_R32_UINT;
+			break;
 		case 2:
 			indexFormat = DXGI_FORMAT_R16_UINT;
-			break;
-		case 4:
-		default:
-			indexFormat = DXGI_FORMAT_R32_UINT;
 			break;
 		}
 

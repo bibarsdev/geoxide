@@ -18,4 +18,5 @@ status('Downloading third-party dependencies...')
 
 # Clone git repositories
 git_clone_repo('SDL2', 'https://github.com/libsdl-org/SDL.git')
+git_clone_repo('assimp', 'https://github.com/assimp/assimp.git')
 

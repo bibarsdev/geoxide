@@ -8,6 +8,7 @@ thirdparty/SDL2/
 thirdparty/shaderc/
 thirdparty/spirv-cross/
 thirdparty/DXC/
+thirdparty/assimp/
 
 *.pyc
 

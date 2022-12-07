@@ -1,0 +1,6 @@
+set shader Phong
+
+vec DiffuseColor 0.8 0.8 0.8 1
+vec AmbientColor 0 0 0 1
+vec SpecularColor 0.8 0.8 0.8 1
+float SpecularPower 25
