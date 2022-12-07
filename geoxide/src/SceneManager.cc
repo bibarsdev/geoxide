@@ -4,6 +4,7 @@
 namespace Geoxide {
 
 	SceneManager::~SceneManager() {
+
 		if (mRendererLib)
 			UnloadSharedLibrary(mRendererLib);
 	}
@@ -68,7 +69,14 @@ namespace Geoxide {
 		if (!NewRenderer)
 			Log::Fatal("Failed to get the procedure \'NewRenderer\' from shared library \'" + rendererPath + "\'");
 
-		mGfx = NewRenderer(window);
+		ImGuiContext* imCtx = ImGui::GetCurrentContext();
+		ImGuiMemAllocFunc imAlloc = 0;
+		ImGuiMemFreeFunc imFree = 0;
+		void* imData = 0;
+
+		ImGui::GetAllocatorFunctions(&imAlloc, &imFree, &imData);
+
+		mGfx = NewRenderer(window, imCtx, imAlloc, imFree, imData);
 
 		if (!mGfx)
 			Log::Fatal("Renderer failed to initialize");

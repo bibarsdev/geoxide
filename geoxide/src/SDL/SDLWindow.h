@@ -24,6 +24,7 @@ namespace Geoxide {
 
 		void setVisibility(bool visible) override;
 
+		void startImGuiFrame() override;
 		Event* pollEvent() override;
 		void destroyWindow() override;
 

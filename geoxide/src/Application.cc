@@ -33,12 +33,18 @@ namespace Geoxide {
 
 	Application::~Application()
 	{
+		ImGui::DestroyContext();
+
 		Log::Info("Ended Application");
 	}
 
 	void Application::initialize(const ApplicationInit& args)
 	{
 		Log::Info("Initializing Application...");
+
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
 
 		// Initialize Window
 		mWindow = Local<Window>(Window::New(args.window));
@@ -70,7 +76,17 @@ namespace Geoxide {
 		float elapsedTime;
 		FrameEvent frameEv(0);
 
-		while (mIsRunning) {
+		while (mIsRunning) 
+		{
+			currentTime = stdclock::now();
+			elapsedTime = (float)co::duration_cast<co::milliseconds>(currentTime - lastTime).count() / 1000.f;
+			lastTime = currentTime;
+
+			frameEv.mElapsedTime = elapsedTime;
+
+			onFrameStart(&frameEv);
+			mScnMan.renderOneFrame();
+			onFrameEnd(&frameEv);
 
 			while (Event* ev = mWindow->pollEvent())
 			{
@@ -94,16 +110,6 @@ namespace Geoxide {
 				}
 				delete ev;
 			}
-
-			currentTime = stdclock::now();
-			elapsedTime = (float)co::duration_cast<co::milliseconds>(currentTime - lastTime).count() / 1000.f;
-			lastTime = currentTime;
-
-			frameEv.mElapsedTime = elapsedTime;
-
-			onFrameStart(&frameEv);
-			mScnMan.renderOneFrame();
-			onFrameEnd(&frameEv);
 		}
 	}
 

@@ -22,6 +22,7 @@ public:
 
 	virtual void onFrameStart(FrameEvent*) = 0;
 	virtual void onFrameEnd(FrameEvent*) = 0;
+	virtual void onImGui(FrameEvent*) = 0;
 	
 protected:
 	TestApplication* mApp;
@@ -39,6 +40,7 @@ public:
 
 	void onFrameStart(FrameEvent*) override;
 	void onFrameEnd(FrameEvent*) override;
+	void onImGui(FrameEvent*) override;
 	void onKeyUp(KeyUpEvent* e) override;
 
 public:

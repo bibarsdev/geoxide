@@ -19,11 +19,22 @@ namespace Geoxide {
 		mTraceMouseMovedEvents = traceAllEvents;
 	}
 
-	void Application::onFrameStart(FrameEvent*)
+	void Application::onFrameStart(FrameEvent* e)
 	{
+		mScnMan.getRenderer()->startImGuiFrame();
+		mWindow->startImGuiFrame();
+		ImGui::NewFrame();
+
+		onImGui(e);
+
+		ImGui::Render();
 	}
 
 	void Application::onFrameEnd(FrameEvent*)
+	{
+	}
+
+	void Application::onImGui(FrameEvent*)
 	{
 	}
 

@@ -7,11 +7,11 @@
 #include <windows.h>
 #include <comdef.h>
 
-#ifdef _DLL
+#ifdef GX_EXPORTS
 #define GXAPI __declspec(dllexport)
 #else
 #define GXAPI __declspec(dllimport)
-#endif // GX_BUILD_SHARED
+#endif // GX_EXPORTS
 
 #define LoadSharedLibrary(path) LoadLibrary(path)
 #define UnloadSharedLibrary(lib) FreeLibrary(lib)

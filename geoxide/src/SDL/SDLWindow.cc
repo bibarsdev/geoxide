@@ -7,6 +7,8 @@
 
 #include <SDL_syswm.h>
 
+#include <backends/imgui_impl_sdl.h>
+
 namespace Geoxide {
 
 	SDLWindow::SDLWindow(const WindowInit& args)
@@ -36,6 +38,10 @@ namespace Geoxide {
 
 		mVisible = false;
 
+#ifdef GX_PLATFORM_WIN32
+		ImGui_ImplSDL2_InitForD3D(mWindow);
+#endif // GX_PLATFORM_WIN32
+		
 		Log::Info("Created new SDLWindow \'" + args.title + "\'");
 
 		Log::Trace("Title: " + std::string(getTitle()));
@@ -104,7 +110,12 @@ namespace Geoxide {
 		else
 			SDL_HideWindow(mWindow);
 	}
-	
+
+	void SDLWindow::startImGuiFrame()
+	{
+		ImGui_ImplSDL2_NewFrame();
+	}
+
 	Event* SDLWindow::pollEvent()
 	{
 		SDL_Event SDLev = {};
@@ -112,6 +123,8 @@ namespace Geoxide {
 
 		if(!SDL_PollEvent(&SDLev))
 			return 0;
+
+		ImGui_ImplSDL2_ProcessEvent(&SDLev);
 
 		switch (SDLev.type)
 		{
@@ -156,6 +169,10 @@ namespace Geoxide {
 		if (mWindow)
 		{
 			std::string name = getTitle();
+
+#ifdef GX_PLATFORM_WIN32
+			ImGui_ImplSDL2_Shutdown();
+#endif // GX_PLATFORM_WIN32
 
 			SDL_DestroyWindow(mWindow);
 			mWindow = 0;

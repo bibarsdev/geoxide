@@ -3,10 +3,10 @@
 #define __GX_RENDERER_H__
 
 #include "RenderTarget.h"
-
 #include "RendererStruct.h"
-
 #include "Window.h"
+
+#include <imgui.h>
 
 namespace Geoxide {
 
@@ -32,9 +32,12 @@ namespace Geoxide {
 		virtual void endScene() = 0;
 
 		virtual void draw(const DrawInput& args) = 0;
+
+		virtual void startImGuiFrame() = 0;
+		virtual void drawImGui() = 0;
 	};
 
-	using NewRendererProc = Renderer* (*)(Window*);
+	using NewRendererProc = Renderer* (*)(Window*, ImGuiContext*, ImGuiMemAllocFunc, ImGuiMemFreeFunc, void*);
 }
 
 #endif

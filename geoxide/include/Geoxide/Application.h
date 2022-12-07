@@ -38,8 +38,9 @@ namespace Geoxide {
 
 		virtual void onFrameStart(FrameEvent*);
 		virtual void onFrameEnd(FrameEvent*);
+		virtual void onImGui(FrameEvent*);
 		virtual void onQuit(Event*);
-		virtual void onWindowClose(Event*); // TODO: Never gets called. Remove or fix later
+		virtual void onWindowClose(Event*); // TODO: Never gets called. Remove or fix
 		virtual void onWindowResized(WindowResizedEvent*);
 		virtual void onWindowFocus(Event*);
 		virtual void onWindowLostFocus(Event*);

@@ -33,6 +33,7 @@ namespace Geoxide {
 
 		virtual void setVisibility(bool visible) = 0;
 
+		virtual void startImGuiFrame() = 0;
 		virtual Event* pollEvent() = 0;
 		virtual void destroyWindow() = 0;
 

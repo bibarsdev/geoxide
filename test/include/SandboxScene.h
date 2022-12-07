@@ -15,6 +15,7 @@ public:
 
 	void onFrameStart(FrameEvent*) override;
 	void onFrameEnd(FrameEvent*) override;
+	void onImGui(FrameEvent*) override;
 };
 
 #endif

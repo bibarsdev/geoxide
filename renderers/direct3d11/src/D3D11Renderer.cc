@@ -1,14 +1,22 @@
 
 #include "Geoxide/D3D11Renderer.h"
 
+#include <backends/imgui_impl_dx11.h>
+
 namespace Geoxide {
 
-	D3D11Renderer::D3D11Renderer(HWND window) :
-		D3D11RendererBase(window) {
+	D3D11Renderer::D3D11Renderer(HWND window, ImGuiContext* imCtx, ImGuiMemAllocFunc alloc_func, ImGuiMemFreeFunc free_func, void* user_data) :
+		D3D11RendererBase(window)
+	{
+		ImGui::SetCurrentContext(imCtx);
+		ImGui::SetAllocatorFunctions(alloc_func, free_func, user_data);
+
+		ImGui_ImplDX11_Init(dev.Get(), ctx.Get());
 	}
 
 	D3D11Renderer::~D3D11Renderer()
 	{
+		ImGui_ImplDX11_Shutdown();
 		Log::Info("Destroyed D3D11Renderer");
 	}
 
@@ -128,6 +136,7 @@ namespace Geoxide {
 
 	void D3D11Renderer::endScene()
 	{
+		drawImGui();
 		sw->Present(1, 0);
 	}
 
@@ -195,11 +204,21 @@ namespace Geoxide {
 		ctx->DrawIndexed(args.indexCount, args.indexStart, 0);
 	}
 
-	Renderer* NewRenderer(Window* wnd)
+	void D3D11Renderer::startImGuiFrame()
+	{
+		ImGui_ImplDX11_NewFrame();
+	}
+
+	void D3D11Renderer::drawImGui()
+	{
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	}
+
+	Renderer* NewRenderer(Window* wnd, ImGuiContext* imCtx, ImGuiMemAllocFunc alloc_func, ImGuiMemFreeFunc free_func, void* user_data)
 	{
 		try
 		{
-			return new D3D11Renderer((HWND)wnd->getNativeHandle());
+			return new D3D11Renderer((HWND)wnd->getNativeHandle(), imCtx, alloc_func, free_func, user_data);
 		}
 		catch (const std::exception& e)
 		{

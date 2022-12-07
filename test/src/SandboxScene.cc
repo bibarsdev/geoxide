@@ -29,3 +29,8 @@ void SandboxScene::onFrameStart(FrameEvent*)
 void SandboxScene::onFrameEnd(FrameEvent*)
 {
 }
+
+void SandboxScene::onImGui(FrameEvent* e)
+{
+
+}

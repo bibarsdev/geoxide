@@ -13,7 +13,7 @@ namespace Geoxide {
 	class D3D11Renderer : public D3D11RendererBase, public Renderer
 	{
 	public:
-		D3D11Renderer(HWND window);
+		D3D11Renderer(HWND window, ImGuiContext* imCtx, ImGuiMemAllocFunc alloc_func, ImGuiMemFreeFunc free_func, void* user_data);
 		~D3D11Renderer();
 
 		GpuProgram* newGpuProgram(const GpuProgramInit& args) override;
@@ -30,9 +30,12 @@ namespace Geoxide {
 		void endScene() override;
 
 		void draw(const DrawInput& args) override;
+
+		void startImGuiFrame() override;
+		void drawImGui() override;
 	};
 	
-	extern "C" GXAPI Renderer* NewRenderer(Window* wnd);
+	extern "C" GXAPI Renderer* NewRenderer(Window* wnd, ImGuiContext* imCtx, ImGuiMemAllocFunc alloc_func, ImGuiMemFreeFunc free_func, void* user_data);
 
 }
 

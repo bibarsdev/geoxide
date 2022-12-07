@@ -17,8 +17,8 @@ void TestApplication::start()
 	appInit.window.title = "Test";
 	appInit.window.x = GX_WINDOWPOS_CENTERED;
 	appInit.window.y = GX_WINDOWPOS_CENTERED;
-	appInit.window.width = 640;
-	appInit.window.height = 480;
+	appInit.window.width = 1280;
+	appInit.window.height = 720;
 	appInit.resMan.shadersDir = "assets/shaders/";
 	appInit.resMan.materialsDir = "assets/materials/";
 	appInit.resMan.modelsDir = "assets/models/";
@@ -88,10 +88,21 @@ EnterSceneName:
 
 void TestApplication::onFrameStart(FrameEvent* e)
 {
+	Application::onFrameStart(e);
+
 	mCurrentScene->onFrameStart(e);
 }
 
 void TestApplication::onFrameEnd(FrameEvent* e)
 {
+	Application::onFrameEnd(e);
+
 	mCurrentScene->onFrameEnd(e);
+}
+
+void TestApplication::onImGui(FrameEvent* e)
+{
+	Application::onImGui(e);
+
+	mCurrentScene->onImGui(e);
 }

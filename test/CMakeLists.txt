@@ -10,7 +10,7 @@ file(GLOB TEXTURE_FILES assets/textures/*.texture)
 file(GLOB SOURCE_FILES src/*.cc)
 
 add_executable				(test ${SOURCE_FILES})
-add_dependencies			(test direct3d11_renderer)
+target_link_libraries		(test direct3d11_renderer)
 target_link_libraries		(test geoxide)
 target_include_directories	(test PUBLIC include ${geoxide_SOURCE_DIR}/include)
 

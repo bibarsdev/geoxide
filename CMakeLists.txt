@@ -52,7 +52,7 @@ endif()
 # Add sub-projects
 add_subdirectory(geoxide_util)
 
-include_directories(${geoxide_util_SOURCE_DIR})
+include_directories(${geoxide_util_SOURCE_DIR}/include)
 link_libraries(geoxide_util)
 
 add_subdirectory(geoxide)
