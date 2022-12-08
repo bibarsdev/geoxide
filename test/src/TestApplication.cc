@@ -1,7 +1,7 @@
 
 #include "TestApplication.h"
 
-#define DEFAULT_CAMERA_POSITION NewVector(0, 5, -10)
+#define DEFAULT_CAMERA_POSITION NewVector(0, 10, -20)
 #define DEFAULT_CAMERA_ORIENTATION NewVector(0, 0, 0)
 
 #define DEFAULT_ENTITY_POSITION NewVector(0, 0, 0)
