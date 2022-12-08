@@ -12,7 +12,7 @@ namespace Geoxide {
 
 	struct ColorFormat
 	{
-		uint32_t fourCC;
+		DataType type;
 		uint32_t bitCount;
 		uint32_t RMask;
 		uint32_t GMask;
@@ -42,7 +42,8 @@ namespace Geoxide {
 		uint32_t arraySize;
 		uint32_t mipLevels;
 		ColorFormat format;
-		bool renderTo;
+		bool RTBindable;
+		bool DTBindable;
 	};
 
 	struct GpuBufferInit
@@ -66,6 +67,13 @@ namespace Geoxide {
 	};
 
 	struct RenderTargetInit
+	{
+		std::string name;
+		Texture* texture;
+		uint32_t arrayIndex;
+	};
+
+	struct DepthTargetInit
 	{
 		std::string name;
 		Texture* texture;

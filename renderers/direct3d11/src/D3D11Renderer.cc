@@ -101,6 +101,21 @@ namespace Geoxide {
 		return 0;
 	}
 
+	DepthTarget* D3D11Renderer::newDepthTarget(const DepthTargetInit& args)
+	{
+		try
+		{
+			return new D3D11DepthTarget(this, args);
+		}
+		catch (const std::exception& e)
+		{
+			Log::Error(e.what());
+			Log::Error("Failed to create D3D11DepthTarget \'" + args.name + "\'");
+		}
+
+		return 0;
+	}
+
 	void D3D11Renderer::makePerspectiveMatrix(const PerspectiveMatrixInput& args, Matrix& outMatrix)
 	{
 		(XMMATRIX&)outMatrix = XMMatrixPerspectiveFovLH(args.fov, args.aspect, args.nearZ, args.farZ);
@@ -116,22 +131,37 @@ namespace Geoxide {
 		(XMMATRIX&)outMatrix = XMMatrixLookAtLH((XMVECTOR&)args.position, (XMVECTOR&)args.center, (XMVECTOR&)args.up);
 	}
 
-	void D3D11Renderer::beginScene(VectorConst clearColor, RenderTarget* renderTarget)
+	void D3D11Renderer::beginScene(VectorConst clearColor, float depth, RenderTarget* renderTarget, DepthTarget* depthTarget)
 	{
 		D3D11RenderTarget* rt = (D3D11RenderTarget*)renderTarget;
-		
+		D3D11DepthTarget* dt = (D3D11DepthTarget*)depthTarget;
+
+		ID3D11DepthStencilView* depthView = 0;
+
+		if (dt)
+		{
+			depthView = dt->dsv.Get();
+		}
+		else
+		{
+			depthView = dsv.Get();
+		}
+
+		ctx->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH, depth, 0);
+
 		if (rt)
 		{
 			ctx->ClearRenderTargetView(rt->rtv.Get(), (float*)&clearColor);
-			ctx->OMSetRenderTargets(1, rt->rtv.GetAddressOf(), 0);
+			ctx->OMSetRenderTargets(1, rt->rtv.GetAddressOf(), depthView);
 			ctx->RSSetViewports(1, &rt->vp);
 		}
 		else
 		{
 			ctx->ClearRenderTargetView(rtv.Get(), (float*)&clearColor);
-			ctx->OMSetRenderTargets(1, rtv.GetAddressOf(), 0);
+			ctx->OMSetRenderTargets(1, rtv.GetAddressOf(), depthView);
 			ctx->RSSetViewports(1, &vp);
 		}
+
 	}
 
 	void D3D11Renderer::endScene()

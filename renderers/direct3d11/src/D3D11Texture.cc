@@ -9,7 +9,7 @@ namespace Geoxide {
 			args.width, args.height, args.pixelData,
 			args.arraySize, args.mipLevels, gfx->translateFormat(args.format),
 			(ID3D11Texture2D**)texture.GetAddressOf(), srv.GetAddressOf(),
-			args.renderTo, args.renderTo, false, false);
+			args.RTBindable, args.DTBindable, false, false);
 
 		Log::Info("Created new D3D11Texture2D \'" + args.name + "\'");
 	}

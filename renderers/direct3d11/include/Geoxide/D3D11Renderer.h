@@ -7,6 +7,7 @@
 #include "D3D11GpuBuffer.h"
 #include "D3D11MeshData.h"
 #include "D3D11RenderTarget.h"
+#include "D3D11DepthTarget.h"
 
 namespace Geoxide {
 
@@ -21,12 +22,13 @@ namespace Geoxide {
 		GpuBuffer* newBuffer(const GpuBufferInit& args) override;
 		MeshData* newMeshData(const MeshDataInit& args) override;
 		RenderTarget* newRenderTarget(const RenderTargetInit& args) override;
+		DepthTarget* newDepthTarget(const DepthTargetInit& args) override;
 
 		void makePerspectiveMatrix(const PerspectiveMatrixInput& args, Matrix& outMatrix) override;
 		void makeOrthographicMatrix(const OrthographicMatrixInput& args, Matrix& outMatrix) override;
 		void makeLookAtMatrix(const LookAtMatrixInput& args, Matrix& outMatrix) override;
 
-		void beginScene(VectorConst clearColor, RenderTarget* renderTarget) override;
+		void beginScene(VectorConst clearColor, float depth, RenderTarget* renderTarget, DepthTarget* depthTarget) override;
 		void endScene() override;
 
 		void draw(const DrawInput& args) override;

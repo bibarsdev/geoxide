@@ -39,7 +39,7 @@ namespace Geoxide {
 		rtvTexture->GetDesc(&tex2Ddesc);
 
 		createTexture2D(tex2Ddesc.Width, tex2Ddesc.Height, 0, tex2Ddesc.ArraySize, tex2Ddesc.MipLevels,
-			DXGI_FORMAT_R24G8_TYPELESS, dsvTexture.GetAddressOf(), 0, false, true, false, false);
+			DXGI_FORMAT_R32_TYPELESS, dsvTexture.GetAddressOf(), 0, false, true, false, false);
 
 		createDepthStencilView(dsvTexture.Get(), 0, dsv.GetAddressOf());
 

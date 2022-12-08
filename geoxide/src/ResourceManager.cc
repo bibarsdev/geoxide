@@ -149,16 +149,39 @@ namespace Geoxide {
 		desc.height = texData.desc.height;
 		desc.arraySize = 1;
 		desc.mipLevels = texData.desc.mipMapCount;
-		desc.renderTo = false;
 
-		desc.format.fourCC = texData.desc.ddspf.fourCC;
+		if (texData.desc.ddspf.flags & kDDSPixelFlagFourCC)
+		{
+			switch (texData.desc.ddspf.fourCC)
+			{
+			case kDDSFourCCDXT5:
+				desc.format.type = kDataTypeBC3;
+				break;
+			case kDDSFourCCATI1:
+			case kDDSFourCCBC4U:
+				desc.format.type = kDataTypeBC4;
+				break;
+			case kDDSFourCCATI2:
+				desc.format.type = kDataTypeBC5;
+				break;
+			default:
+				Log::Error("Unsupported Four character code. fourCC=" + std::string((const char*)&texData.desc.ddspf.fourCC));
+				return 0;
+			}
+		}
+		else
+		{
+			desc.format.type = kDataTypeByte;
+		}
 
-		if (!desc.format.fourCC)
+		if (texData.desc.ddspf.flags & kDDSPixelFlagRGB)
 		{
 			desc.format.bitCount = texData.desc.ddspf.RGBBitCount;
-			desc.format.RMask = texData.desc.ddspf.RBitMask;
-			desc.format.GMask = texData.desc.ddspf.GBitMask;
-			desc.format.BMask = texData.desc.ddspf.BBitMask;
+			desc.format.AMask = texData.desc.ddspf.ABitMask;
+		}
+
+		if (texData.desc.ddspf.flags & kDDSPixelFlagAlphaPixels)
+		{
 			desc.format.AMask = texData.desc.ddspf.ABitMask;
 		}
 

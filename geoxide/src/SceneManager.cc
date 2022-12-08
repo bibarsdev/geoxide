@@ -122,7 +122,7 @@ namespace Geoxide {
 
 	void SceneManager::renderOneFrame()
 	{
-		mGfx->beginScene(mBackColor, 0);
+		mGfx->beginScene(mBackColor, 1.f, 0, 0);
 
 		mMainCamera->updateViewMatrix(mGfx);
 		mMainCamera->updateProjectionMatrix(mGfx);

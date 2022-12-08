@@ -10,6 +10,10 @@ namespace Geoxide {
 		kDataTypeFloat,
 		kDataTypeInt,
 		kDataTypeUInt,
+		kDataTypeByte,
+		kDataTypeBC3,
+		kDataTypeBC4,
+		kDataTypeBC5,
 	};
 
 	enum PrimitiveTopology

@@ -8,16 +8,23 @@
 
 namespace Geoxide {
 
-	D3D11RendererBase::FormatMap D3D11RendererBase::formatDictionary = {
-		{{0, 4 * 8, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000}, DXGI_FORMAT_R8G8B8A8_UNORM},
+	D3D11RendererBase::FormatMap D3D11RendererBase::formatDictionary =
+	{
+		{{kDataTypeUnknown, 4 * 8, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000}, DXGI_FORMAT_R8G8B8A8_TYPELESS},
+		{{kDataTypeByte, 4 * 8, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000}, DXGI_FORMAT_R8G8B8A8_UNORM},
 
-		{{'5TXD', 0, 0, 0, 0, 0}, DXGI_FORMAT_BC3_UNORM},
-		{{'U4CB', 0, 0, 0, 0, 0}, DXGI_FORMAT_BC4_UNORM},
-		{{'1ITA', 0, 0, 0, 0, 0}, DXGI_FORMAT_BC4_UNORM},
-		{{'2ITA', 0, 0, 0, 0, 0}, DXGI_FORMAT_BC5_UNORM},
+		{{kDataTypeUnknown, 4 * 8, 0x000000FF, 0x00000000, 0x00000000, 0x00000000}, DXGI_FORMAT_R32_TYPELESS},
+		{{kDataTypeFloat, 4 * 8, 0x000000FF, 0x00000000, 0x00000000, 0x00000000}, DXGI_FORMAT_R32_FLOAT},
+		{{kDataTypeInt, 4 * 8, 0x000000FF, 0x00000000, 0x00000000, 0x00000000}, DXGI_FORMAT_R32_SINT},
+		{{kDataTypeUInt, 4 * 8, 0x000000FF, 0x00000000, 0x00000000, 0x00000000}, DXGI_FORMAT_R32_UINT},
+
+		{{kDataTypeBC3, 0, 0, 0, 0, 0}, DXGI_FORMAT_BC3_UNORM},
+		{{kDataTypeBC4, 0, 0, 0, 0, 0}, DXGI_FORMAT_BC4_UNORM},
+		{{kDataTypeBC5, 0, 0, 0, 0, 0}, DXGI_FORMAT_BC5_UNORM},
 	};
 
-	D3D11RendererBase::ILFormatMap D3D11RendererBase::ILFormatDictionary = {
+	D3D11RendererBase::ILFormatMap D3D11RendererBase::ILFormatDictionary =
+	{
 		{{1 * sizeof(float), kDataTypeFloat}, DXGI_FORMAT_R32_FLOAT},
 		{{1 * sizeof(int), kDataTypeInt}, DXGI_FORMAT_R32_SINT},
 		{{1 * sizeof(UINT), kDataTypeUInt}, DXGI_FORMAT_R32_UINT},
@@ -61,7 +68,7 @@ namespace Geoxide {
 		if (iter == formatDictionary.end())
 			GX_FUNC_THROW(
 				"Unknown color format. "
-				"fourCC=" + std::to_string(format.fourCC) +
+				"type=" + std::to_string(format.type) +
 				", bitCount=" + std::to_string(format.bitCount) +
 				", RMask=" + std::to_string(format.RMask) +
 				", GMask=" + std::to_string(format.GMask) +

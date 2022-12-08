@@ -18,35 +18,20 @@ namespace Geoxide {
 		{
 			size_t operator()(const FormatKey& p) const
 			{
-				auto hash = std::hash<uint32_t>{}(p.bitCount);
-				hash ^= std::hash<uint32_t>{}(p.fourCC);
-				hash ^= std::hash<uint32_t>{}(p.RMask);
-				hash ^= std::hash<uint32_t>{}(p.GMask);
-				hash ^= std::hash<uint32_t>{}(p.BMask);
-				hash ^= std::hash<uint32_t>{}(p.AMask);
-
-				return hash;
+				return Hash(p);
 			}
 		};
 		
 		struct FormatKeyEqual
 		{
-			bool operator()(const FormatKey& _Left, const FormatKey& _Right) const {
-
-				if (_Left.bitCount != _Right.bitCount)
-					return false;
-				if (_Left.fourCC != _Right.fourCC)
-					return false;
-				if (_Left.RMask != _Right.RMask)
-					return false;
-				if (_Left.GMask != _Right.GMask)
-					return false;
-				if (_Left.BMask != _Right.BMask)
-					return false;
-				if (_Left.AMask != _Right.AMask)
-					return false;
-
-				return true;
+			bool operator()(const FormatKey& _Left, const FormatKey& _Right) const
+			{
+				return _Left.bitCount == _Right.bitCount 
+					&& _Left.type == _Right.type
+					&& _Left.RMask == _Right.RMask 
+					&& _Left.GMask == _Right.GMask 
+					&& _Left.BMask == _Right.BMask
+					&& _Left.AMask == _Right.AMask;
 			}
 		};
 

@@ -3,6 +3,7 @@
 #define __GX_RENDERER_H__
 
 #include "RenderTarget.h"
+#include "DepthTarget.h"
 #include "RendererStruct.h"
 #include "Window.h"
 
@@ -23,12 +24,13 @@ namespace Geoxide {
 		virtual GpuBuffer* newBuffer(const GpuBufferInit& args) = 0;
 		virtual MeshData* newMeshData(const MeshDataInit& args) = 0;
 		virtual RenderTarget* newRenderTarget(const RenderTargetInit& args) = 0;
+		virtual DepthTarget* newDepthTarget(const DepthTargetInit& args) = 0;
 
 		virtual void makePerspectiveMatrix(const PerspectiveMatrixInput& args, Matrix& outMatrix) = 0;
 		virtual void makeOrthographicMatrix(const OrthographicMatrixInput& args, Matrix& outMatrix) = 0;
 		virtual void makeLookAtMatrix(const LookAtMatrixInput& args, Matrix& outMatrix) = 0;
 
-		virtual void beginScene(VectorConst clearColor, RenderTarget* renderTarget) = 0;
+		virtual void beginScene(VectorConst clearColor, float depth, RenderTarget* renderTarget, DepthTarget* depthTarget) = 0;
 		virtual void endScene() = 0;
 
 		virtual void draw(const DrawInput& args) = 0;

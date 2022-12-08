@@ -100,7 +100,7 @@ namespace Geoxide {
 
 		CD3D11_DEPTH_STENCIL_VIEW_DESC dsDesc(
 			(desc.ArraySize > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DARRAY : D3D11_DSV_DIMENSION_TEXTURE2D),
-			desc.Format == DXGI_FORMAT_R24G8_TYPELESS ? DXGI_FORMAT_D24_UNORM_S8_UINT : desc.Format,
+			desc.Format == DXGI_FORMAT_R32_TYPELESS ? DXGI_FORMAT_D32_FLOAT : desc.Format,
 			0, arrayIndex, desc.ArraySize);
 
 		hr = dev->CreateDepthStencilView(texture, &dsDesc, outDepthStencil);
