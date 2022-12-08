@@ -4,10 +4,10 @@
 #include "Geoxide/MeshConverter.h"
 
 #define STB_DXT_IMPLEMENTATION
-#include "stb_dxt.h"
+#include <stb_dxt.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb_image.h>
 
 #define PARSE_OUTPUT_DIR(dest)\
 dest = *(++i);\
