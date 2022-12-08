@@ -57,8 +57,6 @@ void TestApplication::prepareScene()
 	mNode = mScnMan.getRootNode()->newChild();
 
 	mNode->setEntity(&mEntities.at("Bunny"));
-
-	startRendering();
 }
 
 void TestApplication::onKeyUp(KeyUpEvent* e)
