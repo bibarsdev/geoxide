@@ -4,37 +4,13 @@
 
 #include <Geoxide.h>
 
-#define SAFE_DELETE(var) if (var) { delete var; var = 0; }
-
 using namespace Geoxide;
-
-class TestApplication;
-
-class Scene
-{
-public:
-	Scene() : mApp(0), mScnMan(0) {}
-	Scene(TestApplication* app);
-	virtual ~Scene() = default;
-
-	virtual void prepareScene() = 0;
-	virtual void destroyScene() = 0;
-
-	virtual void onFrameStart(FrameEvent*) = 0;
-	virtual void onFrameEnd(FrameEvent*) = 0;
-	virtual void onImGui(FrameEvent*) = 0;
-	
-protected:
-	TestApplication* mApp;
-	ResourceManager* mResMan;
-	SceneManager* mScnMan;
-};
 
 class TestApplication : public Application
 {
 public:
-	TestApplication() : mCurrentScene(0), Application("TestApplication") {}
-	~TestApplication();
+	TestApplication() : Application("TestApplication") {}
+	~TestApplication() {}
 
 	void start();
 
@@ -44,11 +20,18 @@ public:
 	void onKeyUp(KeyUpEvent* e) override;
 
 public:
-	void enterAndLoadScene();
+	void prepareScene();
 
 private:
-	std::unordered_map<std::string, Scene*> mScenes;
-	Scene* mCurrentScene;
+	Vector mBackColor;
+	Vector mCameraPosition;
+	Vector mCameraOrientation;
+	Vector mEntityPosition;
+	Vector mEntityOrientation;
+	Vector mEntityScaling;
+	std::unordered_map<std::string, MeshEntity> mEntities;
+	std::vector<const char*> mEntityNames;
+	SceneNode* mNode;
 };
 
 #endif
