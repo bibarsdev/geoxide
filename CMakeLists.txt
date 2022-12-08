@@ -15,6 +15,8 @@ set(GX_USE_SDL_WINDOW ON)
 # Add third-party projects
 add_subdirectory(thirdparty)
 
+set(STB_INCLUDE_DIR thirdparty/stb)
+
 if(GX_USE_SDL_WINDOW)
 	add_compile_definitions(GX_USE_SDL_WINDOW=1)
 endif()
