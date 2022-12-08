@@ -27,6 +27,14 @@ namespace Geoxide {
 			kCompressionTypeBC5,
 		};
 
+		enum VertexType
+		{
+			kVertexTypePos,
+			kVertexTypePosNormal,
+			kVertexTypePosTexCoords,
+			kVertexTypePosNormalTexCoords,
+		};
+
 	public:
 		MeshConverter(const std::vector<std::string>& args);
 		~MeshConverter() {}
@@ -48,16 +56,16 @@ namespace Geoxide {
 
 		Importer mImp;
 		const aiScene* mScene;
+		std::string mCurrentSourceFile;
 		std::string mCurrentModelName;
 		std::string mCurrentSourceDir;
 
-		std::vector<float> mVertexData;
+		std::stringstream mVertexData;
 		std::vector<uint32_t> mIndexData;
 		uint32_t mLastVertexDataSize;
 		uint32_t mLastIndexDataSize;
-		bool mHasPosition;
-		bool mHasNormals;
-		bool mHasTexcoords;
+		VertexType mVertexType;
+		uint32_t mVertexSize;
 
 		std::vector<ModelData::SubMesh> mSubMeshes;
 		std::unordered_map<std::string, MaterialData> mMaterials;

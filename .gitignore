@@ -4,9 +4,6 @@ build/
 backup/
 temp/
 __pycache__/
-thirdparty/SDL/
-thirdparty/assimp/
-thirdparty/imgui/
 
 *.pyc
 

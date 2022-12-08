@@ -1,4 +1,6 @@
 
+// TODO: add multi-tasking
+
 #include "Geoxide/MeshConverter.h"
 
 #define STB_DXT_IMPLEMENTATION
@@ -74,7 +76,7 @@ if (mat->GetTexture(texType, 0, &str) == aiReturn_SUCCESS) \
 				{\
 					for (uint32_t xx = 0; xx < 4; xx++)\
 					{\
-						copyTexel;\
+						copyTexel\
 					}\
 				}\
 				stb_compress_##type##_block((uint8_t*)(blocks + y * widthInBlocks + x), (const uint8_t*)&texel args);\
@@ -84,6 +86,30 @@ if (mat->GetTexture(texType, 0, &str) == aiReturn_SUCCESS) \
 		texture.desc.pitchOrLinearSize = pitch;\
 		texture.dataSize = textureSize;\
 		texture.desc.ddspf.fourCC = fCC;\
+		break;\
+		}\
+
+#define MESH_PROCESS(type, copyVertex)\
+		{\
+		std::set<size_t> hashSet;\
+		for (uint32_t i = 0; i < numVertices; i++)\
+		{\
+			type vertex;\
+			copyVertex\
+			auto& elem = hashSet.insert(vertex.hash());\
+			if (elem.second)\
+			{\
+				mVertexData.write((const char*)&vertex, sizeof(vertex));\
+			}\
+			else\
+			{\
+				std::replace(\
+					tempIndexData.begin(), tempIndexData.end(),\
+					i,\
+					(uint32_t)(elem.first.operator->() - hashSet.begin().operator->()));\
+			}\
+		}\
+		vertexDataSize = hashSet.size();\
 		break;\
 		}\
 
@@ -102,10 +128,88 @@ namespace Geoxide {
 	using Block8 = uint64_t;
 	using Block16 = Vector;
 
+	struct VertexPos
+	{
+		size_t hash()
+		{
+			auto hash = std::hash<float>{}(pos.x);
+			hash ^= std::hash<float>{}(pos.y);
+			hash ^= std::hash<float>{}(pos.z);
+
+			return hash;
+		}
+
+		aiVector3D pos;
+		float posW = 1;
+	};
+
+	struct VertexPosNormal
+	{
+		size_t hash()
+		{
+			auto hash = std::hash<float>{}(pos.x);
+			hash ^= std::hash<float>{}(pos.y);
+			hash ^= std::hash<float>{}(pos.z);
+
+			hash ^= std::hash<float>{}(normal.x);
+			hash ^= std::hash<float>{}(normal.y);
+			hash ^= std::hash<float>{}(normal.z);
+
+			return hash;
+		}
+
+		aiVector3D pos;
+		float posW = 1;
+		aiVector3D normal;
+	};
+
+	struct VertexPosTexCoords
+	{
+		size_t hash()
+		{
+			auto hash = std::hash<float>{}(pos.x);
+			hash ^= std::hash<float>{}(pos.y);
+			hash ^= std::hash<float>{}(pos.z);
+
+			hash ^= std::hash<float>{}(texCoords.x);
+			hash ^= std::hash<float>{}(texCoords.y);
+
+			return hash;
+		}
+
+		aiVector3D pos;
+		float posW = 1;
+		aiVector2D texCoords;
+	};
+
+	struct VertexPosNormalTexCoords
+	{
+		size_t hash()
+		{
+			auto hash = std::hash<float>{}(pos.x);
+			hash ^= std::hash<float>{}(pos.y);
+			hash ^= std::hash<float>{}(pos.z);
+
+			hash ^= std::hash<float>{}(normal.x);
+			hash ^= std::hash<float>{}(normal.y);
+			hash ^= std::hash<float>{}(normal.z);
+
+			hash ^= std::hash<float>{}(texCoords.x);
+			hash ^= std::hash<float>{}(texCoords.y);
+
+			return hash;
+		}
+
+		aiVector3D pos;
+		float posW = 1;
+		aiVector3D normal;
+		aiVector2D texCoords;
+	};
+
 	MeshConverter::MeshConverter(const std::vector<std::string>& args) :
-		mFlags(aiProcess_PreTransformVertices | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes),
+		mFlags(aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes),
 		mDiffuseCompression(kCompressionTypeNone), mSpecularCompression(kCompressionTypeNone),
-		mScene(0), mLastVertexDataSize(0), mLastIndexDataSize(0)
+		mScene(0), mLastVertexDataSize(0), mLastIndexDataSize(0), mVertexSize(0), mVertexType(kVertexTypePos)
 	{
 		if (args.empty())
 		{
@@ -181,6 +285,7 @@ namespace Geoxide {
 
 			if (mScene)
 			{
+				mCurrentSourceFile = file.string();
 				mCurrentModelName = file.filename().replace_extension().string();
 				mCurrentSourceDir = file.remove_filename().string();
 
@@ -188,33 +293,54 @@ namespace Geoxide {
 				{
 					aiMesh* mesh = mScene->mMeshes[0];
 
-					mHasPosition = mesh->HasPositions();
-					mHasNormals = mesh->HasNormals();
-					mHasTexcoords = mesh->HasTextureCoords(0);
+					bool hasPosition = mesh->HasPositions();
+					bool hasNormals = mesh->HasNormals();
+					bool hasTexcoords = mesh->HasTextureCoords(0);
+
+					if (!hasPosition)
+					{
+						std::cout << "ERROR: file \'" << mCurrentSourceFile << "\' has no positions. Skipped.";
+						continue;
+					}
+
+					if (hasNormals && hasTexcoords)
+					{
+						mVertexType = kVertexTypePosNormalTexCoords;
+						mVertexSize = sizeof(VertexPosNormalTexCoords);
+					}
+					else if (hasNormals)
+					{
+						mVertexType = kVertexTypePosNormal;
+						mVertexSize = sizeof(VertexPosNormal);
+					}
+					else if (hasTexcoords)
+					{
+						mVertexType = kVertexTypePosTexCoords;
+						mVertexSize = sizeof(VertexPosTexCoords);
+					}
+					else
+					{
+						mVertexType = kVertexTypePos;
+						mVertexSize = sizeof(VertexPos);
+					}
 				}
 
 				processNode(mScene->mRootNode);
 
 				ModelData model = {};
 
-				model.desc.vertexDataSize = mVertexData.size() * sizeof(mVertexData[0]);
-				model.desc.indexDataSize = mIndexData.size() * sizeof(mIndexData[0]);
-				model.desc.numSubMeshes = mSubMeshes.size();
+				model.desc.vertexLength = mVertexSize;
+				model.desc.vertexDataSize = mVertexData.tellp();
+				model.vertexData = new uint8_t[model.desc.vertexDataSize];
 
-				model.vertexData = mVertexData.data();
-				model.indexData = mIndexData.data();
-				model.subMeshes = mSubMeshes.data();
-
-				if (mHasPosition)
-					model.desc.vertexLength += 4 * sizeof(float);
-
-				if (mHasNormals)
-					model.desc.vertexLength += 3 * sizeof(float);
-
-				if (mHasTexcoords)
-					model.desc.vertexLength += 2 * sizeof(float);
+				mVertexData.read((char*)model.vertexData, model.desc.vertexDataSize);
 
 				model.desc.indexLength = sizeof(uint32_t);
+				model.desc.indexDataSize = mIndexData.size() * sizeof(mIndexData[0]);
+				model.indexData = mIndexData.data();
+
+				model.subMeshes = mSubMeshes.data();
+				model.desc.numSubMeshes = mSubMeshes.size();
 
 				std::string outModelFile = mModelsOutputDir.string() + mCurrentModelName + ".model";
 
@@ -255,9 +381,8 @@ namespace Geoxide {
 
 				mLastVertexDataSize = 0;
 				mLastIndexDataSize = 0;
-				mHasPosition = false;
-				mHasNormals = false;
-				mHasTexcoords = false;
+				mVertexSize = 0;
+				mVertexType = kVertexTypePos;
 
 				mImp.FreeScene();
 			}
@@ -302,47 +427,44 @@ namespace Geoxide {
 		aiVector3D* normals = mesh->mNormals;
 		aiVector3D* texCoords = mesh->mTextureCoords[0];
 
-		for (uint32_t i = 0; i < numVertices; i++)
-		{
-			if (mHasPosition)
-			{
-				mVertexData.push_back(vertices[i].x);
-				mVertexData.push_back(vertices[i].y);
-				mVertexData.push_back(vertices[i].z);
-				mVertexData.push_back(1);
-			}
-
-			if (mHasNormals)
-			{
-				mVertexData.push_back(normals[i].x);
-				mVertexData.push_back(normals[i].y);
-				mVertexData.push_back(normals[i].z);
-			}
-
-			if (mHasTexcoords)
-			{
-				mVertexData.push_back(texCoords[i].x);
-				mVertexData.push_back(texCoords[i].y);
-			}
-		}
-
 		uint32_t numFaces = mesh->mNumFaces;
 		aiFace* faces = mesh->mFaces;
 
-		for(uint32_t i = 0; i < numFaces; i++)
+		uint32_t vertexDataSize = 0;
+
+		std::vector<uint32_t> tempIndexData;
+
+		for (uint32_t i = 0; i < numFaces; i++)
 		{
 			aiFace face = faces[i];
 			for (uint32_t f = 0; f < face.mNumIndices; f++)
-				mIndexData.push_back(mLastVertexDataSize + face.mIndices[f]);
+				tempIndexData.push_back(face.mIndices[f]);
 		}
 
-		uint32_t indexDataSize = mIndexData.size();
+		switch (mVertexType)
+		{
+		case kVertexTypePos:
+			MESH_PROCESS(VertexPos, vertex.pos = vertices[i];);
+		case kVertexTypePosNormal:
+			MESH_PROCESS(VertexPosNormal, vertex.pos = vertices[i]; vertex.normal = normals[i];);
+		case kVertexTypePosTexCoords:
+			MESH_PROCESS(VertexPosTexCoords, vertex.pos = vertices[i]; vertex.texCoords = (aiVector2D&)texCoords[i];);
+		case kVertexTypePosNormalTexCoords:
+			MESH_PROCESS(VertexPosNormalTexCoords, vertex.pos = vertices[i]; vertex.normal = normals[i]; vertex.texCoords = (aiVector2D&)texCoords[i];);
+		}
 
-		subMesh.desc.indexStart = mLastIndexDataSize;
-		subMesh.desc.indexCount = indexDataSize - mLastIndexDataSize;
+		subMesh.desc.indexStart = mIndexData.size();
+		subMesh.desc.indexCount = tempIndexData.size();
 
-		mLastIndexDataSize = indexDataSize;
-		mLastVertexDataSize = mVertexData.size();
+		for (auto& i : tempIndexData)
+		{
+			mIndexData.push_back(mLastVertexDataSize + i);
+		}
+
+		tempIndexData.clear();
+		tempIndexData.shrink_to_fit();
+
+		mLastVertexDataSize += vertexDataSize;
 
 		uint32_t materialIndex = mesh->mMaterialIndex;
 		auto& iter = mMaterialsIndexMap.find(materialIndex);
@@ -469,18 +591,19 @@ namespace Geoxide {
 
 		texture.desc.ddspf.headerSize = sizeof(texture.desc.ddspf);
 		texture.desc.ddspf.flags = kDDSPixelFlagRGB | kDDSPixelFlagAlphaPixels;
-		texture.desc.ddspf.RGBBitCount = sizeof(Pixel) * 8;
-
-		// R8G8B8A8
-		texture.desc.ddspf.RBitMask = 0x000000FF;
-		texture.desc.ddspf.GBitMask = 0x0000FF00;
-		texture.desc.ddspf.BBitMask = 0x00FF0000;
-		texture.desc.ddspf.ABitMask = 0xFF000000;
 
 
 		if (comp == kCompressionTypeNone)
 		{
 			texture.desc.flags |= kDDSFlagPitch;
+
+			texture.desc.ddspf.RGBBitCount = sizeof(Pixel) * 8;
+
+			// R8G8B8A8
+			texture.desc.ddspf.RBitMask = 0x000000FF;
+			texture.desc.ddspf.GBitMask = 0x0000FF00;
+			texture.desc.ddspf.BBitMask = 0x00FF0000;
+			texture.desc.ddspf.ABitMask = 0xFF000000;
 		}
 		else
 		{
@@ -502,11 +625,11 @@ namespace Geoxide {
 			break; 
 		}
 		case kCompressionTypeBC3:
-			BLOCK4X4_COMPRESS(Block16, Pixel, texel[yy][xx] = rawTexel[yy][xx], dxt, BC3_ARGS, kDDSFourCCDXT5);
+			BLOCK4X4_COMPRESS(Block16, Pixel, texel[yy][xx] = rawTexel[yy][xx]; , dxt, BC3_ARGS, kDDSFourCCDXT5);
 		case kCompressionTypeBC4:
-			BLOCK4X4_COMPRESS(Block8, uint8_t, texel[yy][xx] = rawTexel[yy][xx].r, bc4, , kDDSFourCCBC4U);
+			BLOCK4X4_COMPRESS(Block8, uint8_t, texel[yy][xx] = rawTexel[yy][xx].r; , bc4, , kDDSFourCCBC4U);
 		case kCompressionTypeBC5:
-			BLOCK4X4_COMPRESS(Block16, HalfPixel, texel[yy][xx].r = rawTexel[yy][xx].r; texel[yy][xx].g = rawTexel[yy][xx].g, bc5, , kDDSFourCCATI2);
+			BLOCK4X4_COMPRESS(Block16, HalfPixel, texel[yy][xx].r = rawTexel[yy][xx].r; texel[yy][xx].g = rawTexel[yy][xx].g; , bc5, , kDDSFourCCATI2);
 		}
 
 		std::string texName = fs::path(texFileName).filename().replace_extension().string();

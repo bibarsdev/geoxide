@@ -6,7 +6,7 @@ file(GLOB SOURCE_FILES src/*.cc)
 
 add_executable				(meshconv ${SOURCE_FILES})
 target_link_libraries		(meshconv geoxide assimp)
-target_include_directories	(meshconv PUBLIC include ${geoxide_SOURCE_DIR}/include ${Assimp_SOURCE_DIR}/include)
+target_include_directories	(meshconv PUBLIC include ${geoxide_SOURCE_DIR}/include ${Assimp_SOURCE_DIR}/include ${Assimp_SOURCE_DIR}/assimp/contrib/zlib)
 target_precompile_headers	(meshconv PRIVATE src/pch.h)
 
 if(WIN32)

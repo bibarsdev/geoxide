@@ -9,17 +9,6 @@ project(geoxide-engine)
 
 include(FindPythonInterp)
 
-# Run the 'setup.py' script
-execute_process(
-				  COMMAND ${PYTHON_EXECUTABLE} setup.py
-				  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-				  RESULT_VARIABLE LAST_PYTHON_SCRIPT_RESULT
-			   )
-
-if(NOT ${LAST_PYTHON_SCRIPT_RESULT} MATCHES 0)
-	message(FATAL_ERROR "Failed to execute script 'setup.py'!")
-endif()
-
 # for the time being, we use SDL as the only windowing system
 set(GX_USE_SDL_WINDOW ON)
 

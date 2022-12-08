@@ -6,10 +6,14 @@
 #include <filesystem>
 #include <chrono>
 #include <fstream>
+#include <sstream>
 
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <set>
+#include <thread>
+#include <mutex>
 
 #include <Geoxide/Base.h>
 
