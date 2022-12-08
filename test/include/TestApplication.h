@@ -18,6 +18,7 @@ public:
 	void onFrameEnd(FrameEvent*) override;
 	void onImGui(FrameEvent*) override;
 	void onKeyUp(KeyUpEvent* e) override;
+	void onMouseMoved(MouseMovedEvent* e) override;
 
 public:
 	void prepareScene();

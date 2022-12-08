@@ -1,7 +1,6 @@
 
 #include "SDLWindow.h"
 
-#include "Geoxide/MouseEvent.h"
 #include "Geoxide/KeyEvent.h"
 #include "Geoxide/WindowEvent.h"
 
@@ -11,7 +10,8 @@
 
 namespace Geoxide {
 
-	SDLWindow::SDLWindow(const WindowInit& args)
+	SDLWindow::SDLWindow(const WindowInit& args) :
+		mMouseButtonDown(kMouseButtonUnknown), mVisible(false), mWindow(0)
 	{
 		if (!sSDLInitialized)
 		{
@@ -152,13 +152,15 @@ namespace Geoxide {
 		case SDL_KEYDOWN:
 			return new KeyDownEvent((KeyCode)SDLev.key.keysym.sym, SDLev.key.repeat);
 		case SDL_MOUSEBUTTONUP:
-			return new MouseButtonUpEvent((MouseButton)(SDLev.button.button + 1));
+			mMouseButtonDown = kMouseButtonUnknown;
+			return new MouseButtonUpEvent((MouseButton)(SDLev.button.button));
 		case SDL_MOUSEBUTTONDOWN:
-			return new MouseButtonDownEvent((MouseButton)(SDLev.button.button + 1));
+			mMouseButtonDown = (MouseButton)(SDLev.button.button);
+			return new MouseButtonDownEvent(mMouseButtonDown);
 		case SDL_MOUSEWHEEL:
 			return new MouseWheelEvent(SDLev.wheel.y);
 		case SDL_MOUSEMOTION:
-			return new MouseMovedEvent(SDLev.motion.x, SDLev.motion.y, SDLev.motion.xrel, SDLev.motion.yrel);
+			return new MouseMovedEvent(SDLev.motion.x, SDLev.motion.y, SDLev.motion.xrel, SDLev.motion.yrel, mMouseButtonDown);
 		}
 
 		return 0;

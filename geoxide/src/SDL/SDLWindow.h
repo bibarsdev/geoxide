@@ -4,6 +4,8 @@
 
 #include "Geoxide/Window.h"
 
+#include "Geoxide/MouseEvent.h"
+
 #include <SDL.h>
 
 namespace Geoxide {
@@ -31,6 +33,7 @@ namespace Geoxide {
 	private:
 		SDL_Window* mWindow;
 		bool mVisible;
+		MouseButton mMouseButtonDown;
 		inline static bool sSDLInitialized = false;
 	};
 }

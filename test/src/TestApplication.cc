@@ -73,6 +73,19 @@ void TestApplication::onKeyUp(KeyUpEvent* e)
 	}
 }
 
+void TestApplication::onMouseMoved(MouseMovedEvent* e)
+{
+	Application::onMouseMoved(e);
+
+	switch (e->getButton())
+	{
+	case kMouseButtonLeft:
+		VectorXRef(mCameraOrientation) += e->getYRel() * 0.001f;
+		VectorYRef(mCameraOrientation) += e->getXRel() * 0.001f;
+	}
+
+}
+
 void TestApplication::onFrameStart(FrameEvent* e)
 {
 	Application::onFrameStart(e);
