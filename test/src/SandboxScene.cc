@@ -1,11 +1,11 @@
 
 #include "SandboxScene.h"
 
-#define DEFAULT_CAMERA_POSITION NewVector(0, 5, 10)
+#define DEFAULT_CAMERA_POSITION NewVector(0, 5, -10)
 #define DEFAULT_CAMERA_ORIENTATION NewVector(0, 0, 0)
 
 #define DEFAULT_ENTITY_POSITION NewVector(0, 0, 0)
-#define DEFAULT_ENTITY_ORIENTATION NewVector(0, 3.14f, 0)
+#define DEFAULT_ENTITY_ORIENTATION NewVector(0, 0, 0)
 #define DEFAULT_ENTITY_SCALING NewVector(1, 1, 1)
 
 void SandboxScene::prepareScene()

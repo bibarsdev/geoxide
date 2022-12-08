@@ -37,6 +37,7 @@ namespace Geoxide {
 
 		return buffer;
 	}
+
 }
 
 #endif // GX_PLATFORM_WIN32

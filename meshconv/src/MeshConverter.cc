@@ -91,25 +91,12 @@ if (mat->GetTexture(texType, 0, &str) == aiReturn_SUCCESS) \
 
 #define MESH_PROCESS(type, copyVertex)\
 		{\
-		std::set<size_t> hashSet;\
 		for (uint32_t i = 0; i < numVertices; i++)\
 		{\
 			type vertex;\
 			copyVertex\
-			auto& elem = hashSet.insert(vertex.hash());\
-			if (elem.second)\
-			{\
-				mVertexData.write((const char*)&vertex, sizeof(vertex));\
-			}\
-			else\
-			{\
-				std::replace(\
-					tempIndexData.begin(), tempIndexData.end(),\
-					i,\
-					(uint32_t)(elem.first.operator->() - hashSet.begin().operator->()));\
-			}\
+			mVertexData.write((const char*)&vertex, sizeof(vertex));\
 		}\
-		vertexDataSize = hashSet.size();\
 		break;\
 		}\
 
@@ -130,34 +117,12 @@ namespace Geoxide {
 
 	struct VertexPos
 	{
-		size_t hash()
-		{
-			auto hash = std::hash<float>{}(pos.x);
-			hash ^= std::hash<float>{}(pos.y);
-			hash ^= std::hash<float>{}(pos.z);
-
-			return hash;
-		}
-
 		aiVector3D pos;
 		float posW = 1;
 	};
 
 	struct VertexPosNormal
 	{
-		size_t hash()
-		{
-			auto hash = std::hash<float>{}(pos.x);
-			hash ^= std::hash<float>{}(pos.y);
-			hash ^= std::hash<float>{}(pos.z);
-
-			hash ^= std::hash<float>{}(normal.x);
-			hash ^= std::hash<float>{}(normal.y);
-			hash ^= std::hash<float>{}(normal.z);
-
-			return hash;
-		}
-
 		aiVector3D pos;
 		float posW = 1;
 		aiVector3D normal;
@@ -165,18 +130,6 @@ namespace Geoxide {
 
 	struct VertexPosTexCoords
 	{
-		size_t hash()
-		{
-			auto hash = std::hash<float>{}(pos.x);
-			hash ^= std::hash<float>{}(pos.y);
-			hash ^= std::hash<float>{}(pos.z);
-
-			hash ^= std::hash<float>{}(texCoords.x);
-			hash ^= std::hash<float>{}(texCoords.y);
-
-			return hash;
-		}
-
 		aiVector3D pos;
 		float posW = 1;
 		aiVector2D texCoords;
@@ -184,22 +137,6 @@ namespace Geoxide {
 
 	struct VertexPosNormalTexCoords
 	{
-		size_t hash()
-		{
-			auto hash = std::hash<float>{}(pos.x);
-			hash ^= std::hash<float>{}(pos.y);
-			hash ^= std::hash<float>{}(pos.z);
-
-			hash ^= std::hash<float>{}(normal.x);
-			hash ^= std::hash<float>{}(normal.y);
-			hash ^= std::hash<float>{}(normal.z);
-
-			hash ^= std::hash<float>{}(texCoords.x);
-			hash ^= std::hash<float>{}(texCoords.y);
-
-			return hash;
-		}
-
 		aiVector3D pos;
 		float posW = 1;
 		aiVector3D normal;
@@ -207,7 +144,7 @@ namespace Geoxide {
 	};
 
 	MeshConverter::MeshConverter(const std::vector<std::string>& args) :
-		mFlags(aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes),
+		mFlags(aiProcess_OptimizeMeshes | aiProcess_PreTransformVertices | aiProcess_MakeLeftHanded | aiProcess_JoinIdenticalVertices),
 		mDiffuseCompression(kCompressionTypeNone), mSpecularCompression(kCompressionTypeNone),
 		mScene(0), mLastVertexDataSize(0), mLastIndexDataSize(0), mVertexSize(0), mVertexType(kVertexTypePos)
 	{
@@ -427,20 +364,6 @@ namespace Geoxide {
 		aiVector3D* normals = mesh->mNormals;
 		aiVector3D* texCoords = mesh->mTextureCoords[0];
 
-		uint32_t numFaces = mesh->mNumFaces;
-		aiFace* faces = mesh->mFaces;
-
-		uint32_t vertexDataSize = 0;
-
-		std::vector<uint32_t> tempIndexData;
-
-		for (uint32_t i = 0; i < numFaces; i++)
-		{
-			aiFace face = faces[i];
-			for (uint32_t f = 0; f < face.mNumIndices; f++)
-				tempIndexData.push_back(face.mIndices[f]);
-		}
-
 		switch (mVertexType)
 		{
 		case kVertexTypePos:
@@ -453,18 +376,23 @@ namespace Geoxide {
 			MESH_PROCESS(VertexPosNormalTexCoords, vertex.pos = vertices[i]; vertex.normal = normals[i]; vertex.texCoords = (aiVector2D&)texCoords[i];);
 		}
 
-		subMesh.desc.indexStart = mIndexData.size();
-		subMesh.desc.indexCount = tempIndexData.size();
+		uint32_t numFaces = mesh->mNumFaces;
+		aiFace* faces = mesh->mFaces;
 
-		for (auto& i : tempIndexData)
+		for (uint32_t i = 0; i < numFaces; i++)
 		{
-			mIndexData.push_back(mLastVertexDataSize + i);
+			aiFace face = faces[i];
+			for (uint32_t f = 0; f < face.mNumIndices; f++)
+				mIndexData.push_back(mLastVertexDataSize + face.mIndices[f]);
 		}
 
-		tempIndexData.clear();
-		tempIndexData.shrink_to_fit();
+		size_t indexDataSize = mIndexData.size();
 
-		mLastVertexDataSize += vertexDataSize;
+		subMesh.desc.indexStart = mLastIndexDataSize;
+		subMesh.desc.indexCount = indexDataSize - mLastIndexDataSize;
+
+		mLastIndexDataSize = indexDataSize;
+		mLastVertexDataSize += numVertices;
 
 		uint32_t materialIndex = mesh->mMaterialIndex;
 		auto& iter = mMaterialsIndexMap.find(materialIndex);

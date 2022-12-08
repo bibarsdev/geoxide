@@ -11,7 +11,6 @@ target_precompile_headers	(meshconv PRIVATE src/pch.h)
 target_include_directories	(meshconv PUBLIC include 
 	${geoxide_SOURCE_DIR}/include
 	${Assimp_SOURCE_DIR}/include
-	${Assimp_SOURCE_DIR}/contrib/zlib
 	${STB_INCLUDE_DIR})
 
 if(WIN32)
