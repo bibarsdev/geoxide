@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "Movable.h"
 #include "Mesh.h"
+#include "SkeletalAnimation.h"
 
 namespace Geoxide {
 
@@ -24,18 +25,34 @@ namespace Geoxide {
 		virtual void update(SceneNode* node) override;
 	};
 
-	class MeshEntity : public MovableEntity
+	class AnimableEntity : public MovableEntity
 	{
 	public:
-		MeshEntity() : mMesh(0) {}
-		MeshEntity(Mesh* mesh) : mMesh(mesh) {}
-		virtual ~MeshEntity() = default;
+		AnimableEntity() {}
+
+		virtual ~AnimableEntity() = default;
+		virtual void update(SceneNode* node) override;
+
+		SkeletalAnimationState& getAnimationState() { return mAnimationState; };
+
+	protected:
+		SkeletalAnimationState mAnimationState;
+	};
+
+	class ModelEntity : public AnimableEntity
+	{
+	public:
+		ModelEntity() : mMesh(0), mSkeleton(0) {}
+		ModelEntity(Mesh* mesh, Skeleton* skeleton) : mMesh(mesh), mSkeleton(skeleton) {}
+
+		virtual ~ModelEntity() = default;
 		virtual void update(SceneNode* node) override;
 
 		Mesh* getMesh() { return mMesh; };
 
 	protected:
 		Mesh* mMesh;
+		Skeleton* mSkeleton;
 	};
 
 }

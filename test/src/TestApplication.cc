@@ -39,15 +39,13 @@ void TestApplication::prepareScene()
 	mEntityOrientation = DEFAULT_ENTITY_ORIENTATION;
 	mEntityScaling = DEFAULT_ENTITY_SCALING;
 
-	Mesh* bunnyMesh = mResMan.loadModel("bunny.model");
-	Mesh* lucyMesh = mResMan.loadModel("lucy.model");
-	Mesh* teapotMesh = mResMan.loadModel("teapot.model");
-	Mesh* linkStatueMesh = mResMan.loadModel("link_statue.model");
+	auto bunnyModel = mResMan.loadModel("bunny.model");
+	auto lucyModel = mResMan.loadModel("lucy.model");
+	auto teapotModel = mResMan.loadModel("teapot.model");
 
-	mEntities["Bunny"] = MeshEntity(bunnyMesh);
-	mEntities["Lucy"] = MeshEntity(lucyMesh);
-	mEntities["Teapot"] = MeshEntity(teapotMesh);
-	mEntities["Link Statue"] = MeshEntity(linkStatueMesh);
+	mEntities["Bunny"] = ModelEntity(bunnyModel.first, 0);
+	mEntities["Lucy"] = ModelEntity(lucyModel.first, 0);
+	mEntities["Teapot"] = ModelEntity(teapotModel.first, 0);
 
 	for (auto& entity : mEntities)
 	{
@@ -95,7 +93,7 @@ void TestApplication::onFrameStart(FrameEvent* e)
 	mScnMan.getMainCamera()->setPosition(mCameraPosition);
 	mScnMan.getMainCamera()->setOrientation(mCameraOrientation);
 
-	MeshEntity* entity = (MeshEntity*)mNode->getEntity();
+	ModelEntity* entity = (ModelEntity*)mNode->getEntity();
 
 	entity->setPosition(mEntityPosition);
 	entity->setOrientation(mEntityOrientation);

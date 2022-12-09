@@ -30,7 +30,7 @@ private:
 	Vector mEntityPosition;
 	Vector mEntityOrientation;
 	Vector mEntityScaling;
-	std::unordered_map<std::string, MeshEntity> mEntities;
+	std::unordered_map<std::string, ModelEntity> mEntities;
 	std::vector<const char*> mEntityNames;
 	SceneNode* mNode;
 };

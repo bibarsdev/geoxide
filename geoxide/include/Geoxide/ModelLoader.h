@@ -2,6 +2,8 @@
 #ifndef __GX_MODEL_LOADER_H__
 #define __GX_MODEL_LOADER_H__
 
+#include "SkeletalAnimation.h"
+
 namespace Geoxide {
 
 	struct ModelData
@@ -14,6 +16,18 @@ namespace Geoxide {
 			} desc;
 
 			std::string material;
+		};
+
+		struct Animation
+		{
+			struct
+			{
+				uint32_t numFrames;
+				float duration;
+			} desc;
+			
+			std::string name;
+			Matrix* matrices;
 		};
 
 		struct
@@ -29,6 +43,8 @@ namespace Geoxide {
 
 		void* vertexData, * indexData;
 		SubMesh* subMeshes;
+		Bone* bones;
+		Animation* animations;
 	};
 
 	class ModelLoader

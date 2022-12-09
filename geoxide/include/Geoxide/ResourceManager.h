@@ -4,6 +4,7 @@
 
 #include "Renderer.h"
 #include "Mesh.h"
+#include "SkeletalAnimation.h"
 
 namespace Geoxide {
 
@@ -32,6 +33,7 @@ namespace Geoxide {
 			GpuProgram* program;
 			Material::Reflection ref;
 			const GpuProgramBuffer* sceneBuffer;
+			const GpuProgramBuffer* skeletonBuffer;
 			const GpuProgramBuffer* lightBuffer;
 			const GpuProgramBuffer* materialBuffer;
 		};
@@ -45,18 +47,20 @@ namespace Geoxide {
 		Texture* getTexture(const std::string& name);
 		MeshData* getMeshData(const std::string& name);
 		Material* getMaterial(const std::string& name);
-		Mesh* getModel(const std::string& name);
+		Mesh* getMesh(const std::string& name);
+		Skeleton* getSkeleton(const std::string& name);
 		
 		GpuProgram* loadShader(const std::string& filename);
 		Texture* loadTexture(const std::string& filename);
 		Material* loadMaterial(const std::string& filename);
-		Mesh* loadModel(const std::string& filename);
+		std::pair<Mesh*, Skeleton*> loadModel(const std::string& filename);
 
 		void freeShader(const std::string& name);
 		void freeTexture(const std::string& name);
 		void freeMeshData(const std::string& name);
 		void freeMaterial(const std::string& name);
 		void freeMesh(const std::string& name);
+		void freeSkeleton(const std::string& name);
 
 		void freeAllResources();
 
@@ -78,6 +82,7 @@ namespace Geoxide {
 		std::unordered_map<std::string, MeshData*> mMeshDatas;
 		std::unordered_map<std::string, Material> mMaterials;
 		std::unordered_map<std::string, Mesh> mMeshes;
+		std::unordered_map<std::string, Skeleton> mSkeletons;
 
 	};
 

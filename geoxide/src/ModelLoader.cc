@@ -55,6 +55,22 @@ namespace Geoxide {
 			READ_STR(subMesh.material);
 		}
 
+		for (uint32_t i = 0; i < model.desc.numBones; i++)
+		{
+			READ_BIN(model.bones[i]);
+		}
+
+		for (uint32_t i = 0; i < model.desc.numAnimations; i++)
+		{
+			ModelData::Animation& animation = model.animations[i];
+
+			READ_BIN(animation.desc);
+
+			READ_STR(animation.name);
+
+			READ_BUFFER(animation.matrices, animation.desc.numFrames * model.desc.numBones * sizeof(Matrix));
+		}
+
 		size_t size = file.tellg();
 
 		return size;
@@ -81,6 +97,22 @@ namespace Geoxide {
 			WRITE_BIN(subMesh.desc);
 
 			WRITE_STR(subMesh.material);
+		}
+
+		for (uint32_t i = 0; i < model.desc.numBones; i++)
+		{
+			WRITE_BIN(model.bones[i]);
+		}
+
+		for (uint32_t i = 0; i < model.desc.numAnimations; i++)
+		{
+			ModelData::Animation& animation = model.animations[i];
+
+			WRITE_BIN(animation.desc);
+
+			WRITE_STR(animation.name);
+
+			WRITE_BUFFER(animation.matrices, animation.desc.numFrames * model.desc.numBones * sizeof(Matrix));
 		}
 
 		size_t size = file.tellp();

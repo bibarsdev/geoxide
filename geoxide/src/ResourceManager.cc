@@ -62,7 +62,7 @@ namespace Geoxide {
 		auto& iter = mMeshDatas.find(name);
 
 		if (iter == mMeshDatas.end())
-			return loadModel(name + ".model")->getMeshData();
+			return loadModel(name + ".model").first->getMeshData();
 
 		return iter->second;
 	}
@@ -77,12 +77,22 @@ namespace Geoxide {
 		return &iter->second;
 	}
 
-	Mesh* ResourceManager::getModel(const std::string& name)
+	Mesh* ResourceManager::getMesh(const std::string& name)
 	{
 		auto& iter = mMeshes.find(name);
 
 		if (iter == mMeshes.end())
-			return loadModel(name + ".model");
+			return loadModel(name + ".model").first;
+
+		return &iter->second;
+	}
+
+	Skeleton* ResourceManager::getSkeleton(const std::string& name)
+	{
+		auto& iter = mSkeletons.find(name);
+
+		if (iter == mSkeletons.end())
+			return loadModel(name + ".model").second;
 
 		return &iter->second;
 	}
@@ -269,7 +279,7 @@ namespace Geoxide {
 		return &res;
 	}
 
-	Mesh* ResourceManager::loadModel(const std::string& filename)
+	std::pair<Mesh*, Skeleton*> ResourceManager::loadModel(const std::string& filename)
 	{
 		ModelData modData = {};
 
@@ -293,17 +303,17 @@ namespace Geoxide {
 		MeshData* meshData = mGfx->newMeshData(desc); 
 		mMeshDatas[name] = meshData;
 
-		Mesh& res = mMeshes[name] = Mesh();
+		Mesh& mesh = mMeshes[name] = Mesh();
 
-		res.mMeshData = meshData;
-		
-		res.mNumSubMeshes = modData.desc.numSubMeshes;
-		res.mSubMeshes = new SubMesh[res.mNumSubMeshes];
+		mesh.mMeshData = meshData;
 
-		for (uint32_t i = 0; i < res.mNumSubMeshes; i++)
+		mesh.mNumSubMeshes = modData.desc.numSubMeshes;
+		mesh.mSubMeshes = new SubMesh[mesh.mNumSubMeshes];
+
+		for (uint32_t i = 0; i < mesh.mNumSubMeshes; i++)
 		{
 			ModelData::SubMesh& modSub = modData.subMeshes[i];
-			SubMesh& sub = res.mSubMeshes[i];
+			SubMesh& sub = mesh.mSubMeshes[i];
 
 			sub.indexStart = modSub.desc.indexStart;
 			sub.indexCount = modSub.desc.indexCount;
@@ -311,9 +321,40 @@ namespace Geoxide {
 			sub.material = getMaterial(modSub.material);
 		}
 
-		ModelLoader::Free(modData);
+		if (modData.desc.numBones)
+		{
+			Skeleton& skeleton = mSkeletons[name] = Skeleton();
 
-		return &res;
+			skeleton.mBones.assign(modData.bones, modData.bones + modData.desc.numBones);
+
+			for (uint32_t i = 0; i < modData.desc.numAnimations; i++)
+			{
+				ModelData::Animation& animation = modData.animations[i];
+
+				SkeletalAnimation& skeletalAnim = skeleton.mAnimations[animation.name] = SkeletalAnimation();
+
+				skeletalAnim.mFrames.resize(animation.desc.numFrames);
+
+				for (uint32_t f = 0; f < animation.desc.numFrames; f++)
+				{
+					auto& frame = skeletalAnim.mFrames[f];
+					
+					Matrix* begin = animation.matrices + f * modData.desc.numBones;
+
+					frame.assign(begin, begin + modData.desc.numBones);
+				}
+
+				skeletalAnim.mDuration = animation.desc.duration;
+			}
+
+			return std::make_pair<Mesh*, Skeleton*>(&mesh, &skeleton);
+		}
+		else
+		{
+			ModelLoader::Free(modData);
+
+			return std::make_pair<Mesh*, Skeleton*>(&mesh, 0);
+		}
 	}
 
 	void ResourceManager::freeShader(const std::string& name)
@@ -368,15 +409,23 @@ namespace Geoxide {
 			mMeshes.erase(iter);
 	}
 
+	void ResourceManager::freeSkeleton(const std::string& name)
+	{
+		auto& iter = mSkeletons.find(name);
+
+		if (iter != mSkeletons.end())
+			mSkeletons.erase(iter);
+	}
+
 	void ResourceManager::freeAllResources()
 	{
-		// Renderer resources get freed automatically after the renderer library gets unloaded
 		mShaders.clear();
 		mTextures.clear();
 		mMeshDatas.clear();
 
 		mMaterials.clear();
 		mMeshes.clear();
+		mSkeletons.clear();
 	}
 
 	ResourceManager::Shader ResourceManager::createShader(GpuProgram* program)
@@ -386,6 +435,7 @@ namespace Geoxide {
 		shader.program = program;
 
 		shader.sceneBuffer = shader.program->getBufferByName("SceneProperties");
+		shader.skeletonBuffer = shader.program->getBufferByName("SkeletonProperties");
 		shader.lightBuffer = shader.program->getBufferByName("LightProperties");
 		shader.materialBuffer = shader.program->getBufferByName("MaterialProperties");
 
@@ -393,6 +443,11 @@ namespace Geoxide {
 			shader.ref.sceneBufferIndex = shader.sceneBuffer->getBindOffset();
 		else
 			shader.ref.sceneBufferIndex = -1;
+
+		if (shader.skeletonBuffer)
+			shader.ref.skeletonBufferIndex = shader.skeletonBuffer->getBindOffset();
+		else
+			shader.ref.skeletonBufferIndex = -1;
 
 		if (shader.lightBuffer)
 			shader.ref.lightBufferIndex = shader.lightBuffer->getBindOffset();

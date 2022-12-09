@@ -14,6 +14,7 @@ namespace Geoxide {
 		struct Reflection
 		{
 			uint32_t sceneBufferIndex;
+			uint32_t skeletonBufferIndex;
 			uint32_t lightBufferIndex;
 			uint32_t materialBufferIndex;
 		};
@@ -29,6 +30,7 @@ namespace Geoxide {
 		uint32_t getNumTextures() const { return mNumTextures; }
 
 		uint32_t getSceneBufferIndex() const { return mReflection.sceneBufferIndex; }
+		uint32_t getSkeletonBufferIndex() const { return mReflection.skeletonBufferIndex; }
 		uint32_t getLightBufferIndex() const { return mReflection.lightBufferIndex; }
 		uint32_t getMaterialBufferIndex() const { return mReflection.materialBufferIndex; }
 

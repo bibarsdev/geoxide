@@ -38,6 +38,11 @@ namespace Geoxide {
 			Vector Position;
 		};
 
+		struct SkeletonBufferStruct
+		{
+			Matrix bones[64];
+		};
+
 		struct LightBufferStruct
 		{
 			uint32_t NumLights;
@@ -57,6 +62,7 @@ namespace Geoxide {
 		Renderer* getRenderer() const { return mGfx; }
 		Camera* getMainCamera() const { return mMainCamera.get(); }
 		GpuBuffer* getSceneBuffer() const { return mSceneBuffer; }
+		GpuBuffer* getSkeletonBuffer() const { return mSkeletonBuffer; }
 		GpuBuffer* getLightBuffer() const { return mLightBuffer; }
 		GpuBuffer* getMaterialBuffer() const { return mMaterialBuffer; }
 		MatrixConst getViewProjMatrix() const { return mViewProjMatrix; }
@@ -66,6 +72,7 @@ namespace Geoxide {
 		float getTime() const;
 
 		void updateSceneBuffer(MatrixConst objectWorld);
+		void updateSkeletonBuffer(const std::vector<Matrix>& matrices);
 		void updateLightBuffer(MatrixConst objectWorld);
 		void updateMaterialBuffer(const void* data, uint32_t size);
 
@@ -77,6 +84,7 @@ namespace Geoxide {
 	private:
 		Local<Camera> mMainCamera;
 		GpuBuffer* mSceneBuffer;
+		GpuBuffer* mSkeletonBuffer;
 		GpuBuffer* mLightBuffer;
 		GpuBuffer* mMaterialBuffer;
 		Renderer* mGfx;
@@ -84,6 +92,7 @@ namespace Geoxide {
 		Vector mBackColor;
 		Matrix mViewProjMatrix;
 		SceneBufferStruct mSceneBufferStruct;
+		SkeletonBufferStruct mSkeletonBufferStruct;
 		LightBufferStruct mLightBufferStruct;
 		stdclock::time_point mStartTime;
 		SharedLibrary mRendererLib;

@@ -50,6 +50,11 @@ cbuffer SceneProperties
 	float4 EyePosition;
 };
 
+cbuffer SkeletonProperties
+{
+	matrix bones[64];
+};
+
 cbuffer LightProperties
 {
 	uint NumLights;

@@ -25,9 +25,14 @@ namespace Geoxide {
 
 	}
 
-	void MeshEntity::update(SceneNode* node)
+	void AnimableEntity::update(SceneNode* node)
 	{
 		MovableEntity::update(node);
+	}
+
+	void ModelEntity::update(SceneNode* node)
+	{
+		AnimableEntity::update(node);
 
 		SceneManager* scnMan = node->getSceneManager();
 		Renderer* gfx = scnMan->getRenderer();
@@ -37,7 +42,11 @@ namespace Geoxide {
 		scnMan->updateSceneBuffer(mWorldMatrix);
 		scnMan->updateLightBuffer(mWorldMatrix);
 
+		if (mAnimationState.hasAnimation())
+			scnMan->updateSkeletonBuffer(mAnimationState.getCurrentFrame());
+
 		GpuBuffer* sceneBuffer = scnMan->getSceneBuffer();
+		GpuBuffer* skeletonBuffer = scnMan->getSkeletonBuffer();
 		GpuBuffer* lightBuffer = scnMan->getLightBuffer();
 		GpuBuffer* materialBuffer = scnMan->getMaterialBuffer();
 
@@ -63,10 +72,17 @@ namespace Geoxide {
 			uint32_t sceneBufferIndex = material->getSceneBufferIndex();
 			uint32_t lightBufferIndex = material->getLightBufferIndex();
 			uint32_t materialBufferIndex = material->getMaterialBufferIndex();
+			uint32_t skeletonBufferIndex = material->getSkeletonBufferIndex();
 
 			if (sceneBufferIndex != -1)
 			{
 				VSBuffers[sceneBufferIndex] = sceneBuffer;
+				numVSBuffers++;
+			}
+
+			if (skeletonBufferIndex != -1)
+			{
+				VSBuffers[skeletonBufferIndex] = skeletonBuffer;
 				numVSBuffers++;
 			}
 
@@ -101,5 +117,4 @@ namespace Geoxide {
 			gfx->draw(drawInput);
 		}
 	}
-
 }

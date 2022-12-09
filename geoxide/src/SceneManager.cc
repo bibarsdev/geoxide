@@ -22,6 +22,7 @@ namespace Geoxide {
 			Camera::kProjectionTypePerspective);
 
 		mSceneBufferStruct = {};
+		mSkeletonBufferStruct = {};
 		mLightBufferStruct = {};
 
 		GpuBufferInit bufferDesc = {};
@@ -33,6 +34,12 @@ namespace Geoxide {
 		bufferDesc.dataSize = sizeof(mSceneBufferStruct);
 
 		mSceneBuffer = mGfx->newBuffer(bufferDesc);
+
+		bufferDesc.name = "SkeletonProperties";
+		bufferDesc.data = &mSkeletonBufferStruct;
+		bufferDesc.dataSize = sizeof(mSkeletonBufferStruct);
+
+		mLightBuffer = mGfx->newBuffer(bufferDesc);
 
 		bufferDesc.name = "LightProperties";
 		bufferDesc.data = &mLightBufferStruct;
@@ -113,6 +120,11 @@ namespace Geoxide {
 		mLightBufferStruct.NumLights = 4;
 
 		mLightBuffer->write(&mLightBufferStruct, 0, sizeof(mLightBufferStruct));
+	}
+
+	void SceneManager::updateSkeletonBuffer(const std::vector<Matrix>& matrices)
+	{
+		mSkeletonBuffer->write(matrices.data(), 0, matrices.size() * sizeof(matrices[0]));
 	}
 
 	void SceneManager::updateMaterialBuffer(const void* data, uint32_t size)
