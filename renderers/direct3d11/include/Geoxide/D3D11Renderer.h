@@ -23,6 +23,7 @@ namespace Geoxide {
 		MeshData* newMeshData(const MeshDataInit& args) override;
 		RenderTarget* newRenderTarget(const RenderTargetInit& args) override;
 		DepthTarget* newDepthTarget(const DepthTargetInit& args) override;
+		GpuCommandList* newGpuCommandList() override;
 
 		void makePerspectiveMatrix(const PerspectiveMatrixInput& args, Matrix& outMatrix) override;
 		void makeOrthographicMatrix(const OrthographicMatrixInput& args, Matrix& outMatrix) override;
