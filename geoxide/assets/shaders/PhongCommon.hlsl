@@ -32,9 +32,10 @@ void PhongPixel(float3 in_worldNormal, float3 in_toEye, out float4 lambert, out 
 	{
 		Light light = Lights[i];
 		
-		lambert += Lambert(light.direction.xyz, worldNormal, light.diffuse, DiffuseColor);
-		specular += Specular(toEye, light.direction.xyz, worldNormal, SpecularColor, SpecularPower, light.intensity, light.diffuse);
+		lambert += Lambert(-light.direction.xyz, worldNormal, light.diffuse, DiffuseColor);
+		specular += Specular(toEye, -light.direction.xyz, worldNormal, SpecularPower, light.intensity, SpecularColor, light.diffuse);
 	}
 	
 	lambert = saturate(lambert);
+	specular = saturate(lambert);
 }

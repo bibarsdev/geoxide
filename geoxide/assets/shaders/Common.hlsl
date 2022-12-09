@@ -7,30 +7,33 @@ struct Light
 };
 
 float4 Lambert(
-    float3 lightNormal,
+    float3 lightDir,
     float3 surfaceNormal,
     float4 lightColor,
     float4 surfaceColor
 )
 {
-	float amount = saturate(dot(lightNormal, surfaceNormal));
+	float amount = dot(lightDir, surfaceNormal);
 	float4 color = amount * lightColor * surfaceColor;
 	
 	return color;
 }
 
 float4 Specular(
-    float3 toEye,
-    float3 lightNormal,
+    float3 eyeDir,
+    float3 lightDir,
     float3 surfaceNormal,
+    float power,
+    float intensity,
     float4 specularColor,
-    float specularPower,
-    float specularIntensity,
     float4 lightColor
 )
 {
-	float amount = saturate(dot(surfaceNormal, normalize(lightNormal + toEye)));
-	amount = pow(amount, specularPower) * specularIntensity;
+	float3 reflectDir = reflect(lightDir, surfaceNormal);
+	
+	float amount = dot(eyeDir, reflectDir);
+	amount = pow(amount, power) * intensity;
+	
 	float4 specular = amount * specularColor * lightColor;
 
 	return specular;

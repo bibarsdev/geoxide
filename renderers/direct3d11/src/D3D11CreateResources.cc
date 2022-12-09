@@ -17,7 +17,7 @@ namespace Geoxide {
 			GX_FUNC_THROW("Failed to create ID3D11ShaderResourceView. " + GetFormattedMessage(hr));
 	}
 
-	void D3D11RendererBase::createTexture2D(UINT width, UINT height, const void* data, UINT arraySize, UINT mips, DXGI_FORMAT format,
+	void D3D11RendererBase::createTexture2D(UINT width, UINT height, const void* data, UINT pitch, UINT arraySize, UINT mips, DXGI_FORMAT format,
 		ID3D11Texture2D** outTexture, ID3D11ShaderResourceView** outSRV, bool renderTargetBindable, bool depthStencilBindable, bool enableRead, bool enableWrite)
 	{
 		HRESULT hr;
@@ -43,8 +43,7 @@ namespace Geoxide {
 		{
 			D3D11_SUBRESOURCE_DATA texData;
 			texData.pSysMem = data;
-			texData.SysMemPitch = (width * bitsPerPixel(format) + 7) / 8;
-			texData.SysMemSlicePitch = texData.SysMemPitch * height;
+			texData.SysMemPitch = pitch;
 
 			hr = dev->CreateTexture2D(&texDesc, &texData, outTexture);
 		}

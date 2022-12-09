@@ -149,6 +149,7 @@ namespace Geoxide {
 		desc.height = texData.desc.height;
 		desc.arraySize = 1;
 		desc.mipLevels = texData.desc.mipMapCount;
+		desc.pitch = texData.desc.pitchOrLinearSize;
 
 		if (texData.desc.ddspf.flags & kDDSPixelFlagFourCC)
 		{

@@ -28,6 +28,7 @@ namespace Geoxide {
 			Vector direction;
 			Vector color;
 			float intensity;
+			int pad[3];
 		};
 
 		struct SceneBufferStruct
@@ -43,7 +44,7 @@ namespace Geoxide {
 			int pad[3];
 			LightStruct Lights[4];
 		};
-		int a = sizeof(LightBufferStruct);
+
 	public:
 		SceneManager() : 
 			mViewProjMatrix(NewMatrixIdentity()), mBackColor(NewVector(0, 0, 0, 1)), mRendererLib(0), mRootNode(this, 0){}

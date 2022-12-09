@@ -41,6 +41,7 @@ namespace Geoxide {
 		uint32_t width, height;
 		uint32_t arraySize;
 		uint32_t mipLevels;
+		uint32_t pitch;
 		ColorFormat format;
 		bool RTBindable;
 		bool DTBindable;

@@ -144,7 +144,7 @@ namespace Geoxide {
 	};
 
 	MeshConverter::MeshConverter(const std::vector<std::string>& args) :
-		mFlags(aiProcess_OptimizeMeshes | aiProcess_PreTransformVertices | aiProcess_MakeLeftHanded | aiProcess_JoinIdenticalVertices),
+		mFlags(aiProcess_OptimizeMeshes | aiProcess_PreTransformVertices | aiProcess_MakeLeftHanded | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs),
 		mDiffuseCompression(kCompressionTypeNone), mSpecularCompression(kCompressionTypeNone),
 		mScene(0), mLastVertexDataSize(0), mLastIndexDataSize(0), mVertexSize(0), mVertexType(kVertexTypePos)
 	{
