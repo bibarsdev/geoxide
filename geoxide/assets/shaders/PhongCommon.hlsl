@@ -37,5 +37,4 @@ void PhongPixel(float3 in_worldNormal, float3 in_toEye, out float4 lambert, out 
 	}
 	
 	lambert = saturate(lambert);
-	specular = saturate(lambert);
 }
