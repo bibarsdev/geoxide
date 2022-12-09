@@ -1,5 +1,5 @@
 
-#include "Common.hlsl"
+#include "GeoxideShader.hlsl"
 
 cbuffer MaterialProperties
 {
