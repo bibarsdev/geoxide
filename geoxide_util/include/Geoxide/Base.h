@@ -5,6 +5,6 @@
 #include <Geoxide/Core.h>
 #include <Geoxide/Platform.h>
 #include <Geoxide/Log.h>
-#include <Geoxide/Math3D.h>
+#include <Geoxide/MathTypes.h>
 
 #endif // !__GX_CORE_H__

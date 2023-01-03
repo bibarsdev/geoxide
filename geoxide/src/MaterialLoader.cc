@@ -8,47 +8,23 @@
 Log::Error("\'" + filepath + "\': Unexpected token \'" + token + "\'"); \
 return 0
 
-#define STATE_CHECK(dict, name)\
+#define DICT_CHECK(dict, member)\
 auto& iter = dict.find(token);\
 if (iter != dict.end())\
-material.state.name = iter->second;\
+material.member = iter->second;\
 else\
 {\
 	UNEXPECTED_TOKEN();\
 }
 
-#define STATE_PARSE(dict, name)\
-if (TOKEN_EQUAL(#name))\
+#define DICT_PARSE(dict, member, name)\
+if (TOKEN_EQUAL(name))\
 {\
 	NEXT_TOKEN();\
-	STATE_CHECK(dict, name);\
+	DICT_CHECK(dict, member);\
 }
 
 namespace Geoxide {
-
-	const RenderState MaterialLoader::kDefaultState = { kBlendTypeOpaque, kCullTypeBackFace, kSamplerTypeLinearWrap, false, true, 1.f };
-
-	const std::unordered_map<std::string, BlendType> kBlendDict = {
-		{"opaque", kBlendTypeOpaque},
-		{"alphaBlend", kBlendTypeAlphaBlend},
-		{"additive", kBlendTypeAdditive},
-		{"nonPremultiplied", kBlendTypeNonPremultiplied},
-	};
-
-	const std::unordered_map<std::string, CullType> kCullDict = {
-		{"none", kCullTypeNone},
-		{"backFace", kCullTypeBackFace},
-		{"frontFace", kCullTypeFrontFace},
-	};
-
-	const std::unordered_map<std::string, SamplerType> kSamplerDict = {
-		{"pointWarp", kSamplerTypePointWrap},
-		{"pointClamp", kSamplerTypePointClamp},
-		{"linearWarp", kSamplerTypeLinearWrap},
-		{"linearClamp", kSamplerTypeLinearClamp},
-		{"anisotropicWarp", kSamplerTypeAnisotropicWrap},
-		{"anisotropicClamp", kSamplerTypeAnisotropicClamp},
-	};
 
 	const std::unordered_map<std::string, bool> kBoolDict = {
 		{"on", true},
@@ -59,28 +35,6 @@ namespace Geoxide {
 		{"0", false},
 		{"yes", true},
 		{"no", false},
-	};
-
-	const std::unordered_map<BlendType, std::string> kBlendDictRev = {
-		{kBlendTypeOpaque, "opaque"},
-		{kBlendTypeAlphaBlend, "alphaBlend"},
-		{kBlendTypeAdditive, "additive"},
-		{kBlendTypeNonPremultiplied, "nonPremultiplied"},
-	};
-
-	const std::unordered_map<CullType, std::string> kCullDictRev = {
-		{kCullTypeNone, "none"},
-		{kCullTypeBackFace, "backFace"},
-		{kCullTypeFrontFace, "frontFace"},
-	};
-
-	const std::unordered_map<SamplerType, std::string> kSamplerDictRev = {
-		{kSamplerTypePointWrap, "pointWarp"},
-		{kSamplerTypePointClamp, "pointClamp"},
-		{kSamplerTypeLinearWrap, "linearWarp"},
-		{kSamplerTypeLinearClamp, "linearClamp"},
-		{kSamplerTypeAnisotropicWrap, "anisotropicWarp"},
-		{kSamplerTypeAnisotropicClamp, "anisotropicClamp"},
 	};
 
 	const std::unordered_map<bool, std::string> kBoolDictRev = {
@@ -116,40 +70,18 @@ namespace Geoxide {
 
 		file.close();
 
-		material.state = kDefaultState;
-
 		static const char delim[] = " \t\n\r";
 
 		char* token = strtok(buffer, delim);
 
 		while (token)
 		{
-			if (TOKEN_EQUAL("set"))
+			if (TOKEN_EQUAL("shader"))
 			{
 				NEXT_TOKEN();
-
-				if (TOKEN_EQUAL("shader"))
-				{
-					NEXT_TOKEN();
-					material.shader = token;
-				}
-				else if (TOKEN_EQUAL("opacity"))
-				{
-					NEXT_TOKEN();
-					material.state.opacity = (float)atof(token);
-				}
-				else STATE_PARSE(kBlendDict, blend)
-				else STATE_PARSE(kCullDict, cull)
-				else STATE_PARSE(kSamplerDict, sampler)
-				else STATE_PARSE(kBoolDict, wireFrame)
-				else STATE_PARSE(kBoolDict, zWrite)
-				else
-				{
-					UNEXPECTED_TOKEN();
-				}
-
+				material.shader = token;
 			}
-			else if (TOKEN_EQUAL("vec"))
+			else if (TOKEN_EQUAL("float4"))
 			{
 				char* name = NEXT_TOKEN();
 
@@ -158,7 +90,26 @@ namespace Geoxide {
 				float z = (float)atof(NEXT_TOKEN());
 				float w = (float)atof(NEXT_TOKEN());
 
-				material.vectors[name] = NewVector(x, y, z, w);
+				material.vector4s[name] = float4(x, y, z, w);
+			}
+			else if (TOKEN_EQUAL("float3"))
+			{
+				char* name = NEXT_TOKEN();
+
+				float x = (float)atof(NEXT_TOKEN());
+				float y = (float)atof(NEXT_TOKEN());
+				float z = (float)atof(NEXT_TOKEN());
+
+				material.vector3s[name] = float3(x, y, z);
+			}
+			else if (TOKEN_EQUAL("float2"))
+			{
+				char* name = NEXT_TOKEN();
+
+				float x = (float)atof(NEXT_TOKEN());
+				float y = (float)atof(NEXT_TOKEN());
+
+				material.vector2s[name] = float2(x, y);
 			}
 			else if (TOKEN_EQUAL("float"))
 			{
@@ -217,32 +168,26 @@ namespace Geoxide {
 		if (material.shader.empty())
 			return 0;
 
-		file << "set shader " << material.shader << '\n';
-
-		if (material.state.blend != kDefaultState.blend)
-			file << "set blend " << kBlendDictRev.at(material.state.blend) << '\n';
-
-		if (material.state.cull != kDefaultState.cull)
-			file << "set cull " << kCullDictRev.at(material.state.cull) << '\n';
-
-		if (material.state.sampler != kDefaultState.sampler)
-			file << "set sampler " << kSamplerDictRev.at(material.state.sampler) << '\n';
-
-		if (material.state.wireFrame != kDefaultState.wireFrame)
-			file << "set wireFrame " << kBoolDictRev.at(material.state.wireFrame) << '\n';
-
-		if (material.state.zWrite != kDefaultState.zWrite)
-			file << "set zWrite " << kBoolDictRev.at(material.state.zWrite) << '\n';
-
-		if (material.state.opacity != kDefaultState.opacity)
-			file << "set opacity " << material.state.opacity << '\n';
+		file << "shader " << material.shader << '\n';
 
 		file << '\n';
 			
-		for (auto& var : material.vectors)
+		for (auto& var : material.vector4s)
 		{
-			Vector vector = var.second;
-			file << "vec " << var.first << ' ' << vector.x << ' ' << vector.y << ' ' << vector.z << ' ' << vector.w << '\n';
+			float4 vector = var.second;
+			file << "float4 " << var.first << ' ' << vector.x << ' ' << vector.y << ' ' << vector.z << ' ' << vector.w << '\n';
+		}
+
+		for (auto& var : material.vector3s)
+		{
+			float3 vector = var.second;
+			file << "float3 " << var.first << ' ' << vector.x << ' ' << vector.y << ' ' << vector.z<< '\n';
+		}
+
+		for (auto& var : material.vector2s)
+		{
+			float2 vector = var.second;
+			file << "float2 " << var.first << ' ' << vector.x << ' ' << vector.y << '\n';
 		}
 
 		for (auto& var : material.floats)

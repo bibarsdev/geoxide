@@ -20,7 +20,10 @@ namespace Geoxide {
 		std::ifstream file(filepath, std::ios::binary);
 
 		if (!file.is_open())
+		{
+			Log::Error("Failed to open \'" + filepath + "\'");
 			return 0;
+		}
 
 		int magicNumber = 0;
 

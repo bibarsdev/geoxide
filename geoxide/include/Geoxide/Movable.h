@@ -7,30 +7,25 @@ namespace Geoxide {
 	class Movable
 	{
 	public:
-		void setPosition(VectorConst v) { mPosition = v; }
-		void setOrientation(VectorConst v) { mOrientation = v; }
-		void setScaling(VectorConst v) { mScaling = v; }
-		void setPitch(float rad) { VectorXRef(mOrientation) = rad; }
-		void setYaw(float rad) { VectorYRef(mOrientation) = rad; }
-		void setRoll(float rad) { VectorZRef(mOrientation) = rad; }
+		void setPosition(cfloat3 v) { mPosition = v; }
+		void setOrientation(cfloat3 v) { mOrientation = v; }
+		void setScaling(cfloat3 v) { mScaling = v; }
+		void setPitch(float rad) { mOrientation.x = rad; }
+		void setYaw(float rad) { mOrientation.y = rad; }
+		void setRoll(float rad) { mOrientation.z = rad; }
 
-		VectorConst getPosition() const { return mPosition; }
-		VectorConst getQuaternion() const { return mOrientation; }
-		VectorConst getScaling() const { return mScaling; }
-
-		MatrixConst getWorldMatrix() const { return mWorldMatrix; }
-
-		void updateWorldMatrix();
+		cfloat3 getPosition() const { return mPosition; }
+		cfloat3 getQuaternion() const { return mOrientation; }
+		cfloat3 getScaling() const { return mScaling; }
 
 	protected:
 		Movable() :
-			mPosition(NewVector(0, 0, 0)), mOrientation(NewVector(0, 0, 0)), mScaling(NewVector(1, 1, 1)), mWorldMatrix(NewMatrixIdentity()) {}
+			mScaling(1, 1, 1) {}
 
 	protected:
-		Vector mPosition;
-		Vector mOrientation;
-		Vector mScaling;
-		Matrix mWorldMatrix;
+		float3 mPosition;
+		float3 mOrientation;
+		float3 mScaling;
 	};
 
 }

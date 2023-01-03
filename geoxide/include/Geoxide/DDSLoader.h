@@ -41,6 +41,26 @@ namespace Geoxide {
 		kDDSFourCCATI2 = '2ITA',
 	};
 
+	enum DDSComplexity
+	{
+		kDDSComplexityFlagComplex = 0x8,
+		kDDSComplexityFlagMipMap = 0x400000,
+		kDDSComplexityFlagTexture = 0x1000,
+		kDDSComplexityFlagRequired = kDDSComplexityFlagTexture,
+	};
+
+	enum DDSDetailFlag
+	{
+		kDDSDetailFlagCubeMap = 0x200,
+		kDDSDetailFlagCubeMapPositiveX = 0x400,
+		kDDSDetailFlagCubeMapNegativeX = 0x800,
+		kDDSDetailFlagCubeMapPositiveY = 0x1000,
+		kDDSDetailFlagCubeMapNegativeY = 0x2000,
+		kDDSDetailFlagCubeMapPositiveZ = 0x4000,
+		kDDSDetailFlagCubeMapNegativeZ = 0x8000,
+		kDDSDetailFlagVolume = 0x200000,
+	};
+
 	struct DDSData
 	{
 		struct PixelFormat
@@ -64,13 +84,13 @@ namespace Geoxide {
 			uint32_t pitchOrLinearSize;
 			uint32_t depth;
 			uint32_t mipMapCount;
-			uint32_t reserved1[11];
+			uint32_t unused1[11];
 			PixelFormat ddspf;
-			uint32_t caps;
-			uint32_t caps2;
-			uint32_t caps3;
-			uint32_t caps4;
-			uint32_t reserved2;
+			uint32_t complexityFlags;
+			uint32_t detailFlags;
+			uint32_t unused2;
+			uint32_t unused3;
+			uint32_t unused4;
 		} desc;
 
 		size_t dataSize;

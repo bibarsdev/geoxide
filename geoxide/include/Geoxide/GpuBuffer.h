@@ -4,14 +4,23 @@
 
 namespace Geoxide {
 
-	class GpuBuffer
+	enum GpuBufferType
 	{
-	public:
-		virtual ~GpuBuffer() = default;
+		kGpuBufferShader,
+		kGpuBufferVertex,
+		kGpuBufferIndex,
+	};
 
-		virtual uint32_t getSize() const = 0;
+	struct GpuBufferDesc
+	{
+		GpuBufferType type;
+		uint32_t size;
+		uint32_t stride;
+	};
 
-		virtual void write(const void* data, uint32_t start, uint32_t count) = 0;
+	struct GpuBuffer : Internal
+	{
+		GpuBufferDesc desc;
 	};
 
 }

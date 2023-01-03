@@ -2,17 +2,18 @@
 #ifndef __GX_MATERIAL_LOADER_H__
 #define __GX_MATERIAL_LOADER_H__
 
-#include "RendererStruct.h"
+#include "RenderState.h"
+#include "Mesh.h"
 
 namespace Geoxide {
 
 	struct MaterialData
 	{
 		std::string shader;
-
-		RenderState state;
 		
-		std::unordered_map<std::string, Vector> vectors;
+		std::unordered_map<std::string, float4> vector4s;
+		std::unordered_map<std::string, float3> vector3s;
+		std::unordered_map<std::string, float2> vector2s;
 		std::unordered_map<std::string, float> floats;
 		std::unordered_map<std::string, int> ints;
 		std::unordered_map<std::string, bool> bools;
@@ -28,9 +29,6 @@ namespace Geoxide {
 
 		// returns written bytes size
 		static size_t Write(const MaterialData& material, const std::string& filepath);
-
-	public:
-		static const RenderState kDefaultState;
 	};
 
 }

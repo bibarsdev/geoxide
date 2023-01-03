@@ -1,6 +1,4 @@
-set shader Phong
+shader Lit/ColorSpec.hlsl
 
-vec DiffuseColor 0.8 0.8 0.8 1
-vec AmbientColor 0 0 0 1
-vec SpecularColor 0.8 0.8 0.8 1
-float SpecularPower 25
+vec3 surfaceColor 0.8 0.8 0.8
+float specular 10

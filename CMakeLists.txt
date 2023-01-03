@@ -16,6 +16,7 @@ set(GX_USE_SDL_WINDOW ON)
 add_subdirectory(thirdparty)
 
 set(STB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/stb)
+set(CGLTF_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/cgltf)
 
 if(GX_USE_SDL_WINDOW)
 	add_compile_definitions(GX_USE_SDL_WINDOW=1)
@@ -48,5 +49,5 @@ link_libraries(geoxide_util)
 
 add_subdirectory(geoxide)
 add_subdirectory(renderers)
-add_subdirectory(meshconv)
+add_subdirectory(converters)
 add_subdirectory(test)

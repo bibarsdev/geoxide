@@ -1,0 +1,4 @@
+shader Lit/ColorSpec.hlsl
+
+float3 surfaceColor 1 1 1
+float specular 0.552786

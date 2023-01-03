@@ -7,24 +7,69 @@
 #include "WindowEvent.h"
 #include "FrameEvent.h"
 
-#include "ResourceManager.h"
-#include "SceneManager.h"
+#include "Scene.h"
+#include "SkeletalAnimation.h"
+
+#include "RendererDevice.h"
+#include "RendererContext.h"
+
+#include <imgui.h>
 
 namespace Geoxide {
+
+	namespace co = std::chrono;
+	using stdclock = co::steady_clock;
+
+	struct TransformComponent
+	{
+		TransformComponent(
+			float3 position = float3(),
+			float3 orientation = float3(),
+			float3 scaling = float3(1, 1, 1))
+			: position(position), orientation(orientation), scaling(scaling) {}
+
+		float3 position;
+		float3 orientation;
+		float3 scaling;
+	};
+
+	struct PointLightComponent : PointLightDesc
+	{
+		PointLightComponent(cfloat3 position, float radius, cfloat3 color, float brightness)
+			: PointLightDesc{ position, radius, color, brightness } {}
+	};
+
+	struct RendererComponent
+	{
+		RendererComponent(Mesh* mesh) : mesh(mesh){}
+
+		Ref<Mesh> mesh;
+	};
+
+	struct SkeletalComponent
+	{
+		SkeletalComponent(Shared<Skeleton>& skeleton) : skeleton(skeleton) { sate.setAnimation(&skeleton->getAnimationByIndex(0)); }
+
+		Shared<Skeleton> skeleton;
+		SkeletalAnimationState sate;
+	};
+
+	struct ResourcePaths
+	{
+		std::string shaders;
+		std::string materials;
+		std::string models;
+		std::string textures;
+	};
 
 	struct ApplicationInit
 	{
 		WindowInit window;
-		ResourceManagerInit resMan;
-		SceneManagerInit scnMan;
+		ResourcePaths paths;
 	};
 
 	class Application
 	{
-	public:
-		ResourceManager* getResourceManager() { return &mResMan; }
-		SceneManager* getSceneManager() { return &mScnMan; }
-
 	protected:
 		Application(const std::string& name);
 		virtual ~Application();
@@ -33,6 +78,11 @@ namespace Geoxide {
 
 		void startRendering();
 		void stopRendering();
+
+		Scene* newScene(const std::string& name);
+
+		Entity* newModel(const std::string& name);
+		Entity* newSkyBox(const std::string& texture);
 
 		void setTraceAllEvents(bool traceAllEvents);
 
@@ -54,8 +104,21 @@ namespace Geoxide {
 
 	protected:
 		Local<Window> mWindow;
-		ResourceManager mResMan;
-		SceneManager mScnMan;
+
+		Ref<RendererDevice> mGfxDev;
+		Ref<RendererContext> mGfxCtx;
+
+		std::unordered_map<std::string, Ref<GpuProgram>> mPrograms;
+		std::unordered_map<std::string, std::pair<Ref<GpuBuffer>, Ref<GpuBuffer>>> mMeshDatas;
+		std::unordered_map<std::string, Ref<Texture>> mTextures;
+		std::unordered_map<std::string, Ref<Mesh>> mMeshes;
+		std::unordered_map<std::string, Shared<Material>> mMaterials;
+		std::unordered_map<std::string, Shared<Skeleton>> mSkeletons;
+
+		Scene* mCurrentScene;
+
+		SharedLibrary mRendererLib;
+
 		bool mIsRunning;
 		bool mTraceQuitEvents;
 		bool mTraceWindowCloseEvents;
@@ -70,8 +133,21 @@ namespace Geoxide {
 		bool mTraceMouseWheelEvents;
 		bool mTraceMouseMovedEvents;
 
+		bool mVsync;
+
+	private:
+		void initializeRenderer();
+		void renderOneFrame();
+		void createCubeMesh();
+		void createPlaneMesh();
+
+		GpuProgram* loadShader(const std::string& name);
+		Texture* loadTexture(const std::string& name);
+		Material* loadMaterial(const std::string& name);
+
 	private:
 		std::string mName;
+		ResourcePaths mPaths;
 		bool mHasInitialized;
 	};
 

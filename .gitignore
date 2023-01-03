@@ -8,3 +8,5 @@ __pycache__/
 *.pyc
 
 cmakesettings.json
+
+renderers/direct3d11/compile_shaders.cmd

@@ -1,12 +1,14 @@
 
 #include "TestApplication.h"
 
-#define DEFAULT_CAMERA_POSITION NewVector(0, 10, -20)
-#define DEFAULT_CAMERA_ORIENTATION NewVector(0, 0, 0)
+#define DEFAULT_CAMERA_POSITION float3(0, 10, -20)
+#define DEFAULT_CAMERA_ORIENTATION float3(0, 0, 0)
 
-#define DEFAULT_ENTITY_POSITION NewVector(0, 0, 0)
-#define DEFAULT_ENTITY_ORIENTATION NewVector(0, 0, 0)
-#define DEFAULT_ENTITY_SCALING NewVector(1, 1, 1)
+#define DEFAULT_ENTITY_POSITION float3(0, 0, 0)
+#define DEFAULT_ENTITY_ORIENTATION float3(0, 0, 0)
+#define DEFAULT_ENTITY_SCALING float3(0.1f, 0.1f, 0.1f)
+
+#define DEFAULT_LIGHT_POSITION float3(0, -1, 0)
 
 void TestApplication::start()
 {
@@ -16,10 +18,10 @@ void TestApplication::start()
 	appInit.window.y = GX_WINDOWPOS_CENTERED;
 	appInit.window.width = 1280;
 	appInit.window.height = 720;
-	appInit.resMan.shadersDir = "assets/shaders/";
-	appInit.resMan.materialsDir = "assets/materials/";
-	appInit.resMan.modelsDir = "assets/models/";
-	appInit.resMan.texturesDir = "assets/textures/";
+	appInit.paths.shaders = "assets/shaders/";
+	appInit.paths.materials = "assets/materials/";
+	appInit.paths.models = "assets/models/";
+	appInit.paths.textures = "assets/textures/";
 
 	initialize(appInit);
 
@@ -30,7 +32,11 @@ void TestApplication::start()
 
 void TestApplication::prepareScene()
 {
-	mBackColor = NewVector(0.2f, 0.2f, 0.8f, 1);
+	mCurrentScene = newScene("MainScene");
+
+	mAnimationSpeed = 1.f;
+
+	mBackColor = float4(0.53f, 0.8f, 0.92f, 1);
 
 	mCameraPosition = DEFAULT_CAMERA_POSITION;
 	mCameraOrientation = DEFAULT_CAMERA_ORIENTATION;
@@ -39,22 +45,28 @@ void TestApplication::prepareScene()
 	mEntityOrientation = DEFAULT_ENTITY_ORIENTATION;
 	mEntityScaling = DEFAULT_ENTITY_SCALING;
 
-	auto bunnyModel = mResMan.loadModel("bunny.model");
-	auto lucyModel = mResMan.loadModel("lucy.model");
-	auto teapotModel = mResMan.loadModel("teapot.model");
+	mLightPosition = DEFAULT_LIGHT_POSITION;
+	mLightColor = float4(1, 1, 1, 1);
 
-	mEntities["Bunny"] = ModelEntity(bunnyModel.first, 0);
-	mEntities["Lucy"] = ModelEntity(lucyModel.first, 0);
-	mEntities["Teapot"] = ModelEntity(teapotModel.first, 0);
+	mMainLight = mCurrentScene->newEntity();
 
-	for (auto& entity : mEntities)
+	mMainLight->addComponent<TransformComponent>(0, 0, float3(100, 1, 100));
+	mMainLight->addComponent<PointLightComponent>(mLightPosition, 10, mLightColor.xyz, 10);
+	mMainLight->addComponent<RendererComponent>(mMeshes.at("Cube"));
+
+	mMainEntity = newModel("monkey_dancing.model");
+
+	//mSkyBoxes["Blue Space"] = newSkyBox("bluespace_skybox.texture");
+	//mSkyBoxes["Light Blue Space"] = newSkyBox("lightbluespace_skybox.texture");
+	//mSkyBoxes["Red Space"] = newSkyBox("redspace_skybox.texture");
+
+	for (auto& skybox : mSkyBoxes)
 	{
-		mEntityNames.push_back(entity.first.c_str());
+		mSkyBoxNames.push_back(skybox.first.c_str());
 	}
 
-	mNode = mScnMan.getRootNode()->newChild();
+	//mMainSkyBox = mSkyBoxes["Blue Space"];
 
-	mNode->setEntity(&mEntities.at("Bunny"));
 }
 
 void TestApplication::onKeyUp(KeyUpEvent* e)
@@ -78,8 +90,8 @@ void TestApplication::onMouseMoved(MouseMovedEvent* e)
 	switch (e->getButton())
 	{
 	case kMouseButtonLeft:
-		VectorXRef(mCameraOrientation) += e->getYRel() * 0.001f;
-		VectorYRef(mCameraOrientation) += e->getXRel() * 0.001f;
+		mCameraOrientation.x += e->getYRel() * 0.001f;
+		mCameraOrientation.y += e->getXRel() * 0.001f;
 	}
 
 }
@@ -88,16 +100,22 @@ void TestApplication::onFrameStart(FrameEvent* e)
 {
 	Application::onFrameStart(e);
 
-	mScnMan.setBackColor(mBackColor);
+	mCurrentScene->setBackColor(mBackColor);
 
-	mScnMan.getMainCamera()->setPosition(mCameraPosition);
-	mScnMan.getMainCamera()->setOrientation(mCameraOrientation);
+	mCurrentScene->getMainCamera().setPosition(mCameraPosition);
+	mCurrentScene->getMainCamera().setOrientation(mCameraOrientation);
 
-	ModelEntity* entity = (ModelEntity*)mNode->getEntity();
+	mMainLight->getComponent<TransformComponent>()->position = mLightPosition;
+	mMainLight->getComponent<PointLightComponent>()->color = mLightColor.xyz;
 
-	entity->setPosition(mEntityPosition);
-	entity->setOrientation(mEntityOrientation);
-	entity->setScaling(mEntityScaling);
+	mMainEntity->getComponent<SkeletalComponent>()->sate.setCyclic(true);
+	mMainEntity->getComponent<SkeletalComponent>()->sate.addTime(e->getElapsedTime() * mAnimationSpeed);
+
+	mMainEntity->getComponent<TransformComponent>()->position = mEntityPosition;
+	mMainEntity->getComponent<TransformComponent>()->orientation = mEntityOrientation;
+	mMainEntity->getComponent<TransformComponent>()->scaling = mEntityScaling;
+
+	//mMainSkyBox->getComponent<TransformComponent>()->position = mCurrentScene->getMainCamera().getPosition();
 }
 
 void TestApplication::onFrameEnd(FrameEvent* e)
@@ -110,24 +128,31 @@ void TestApplication::onImGui(FrameEvent* e)
 	Application::onImGui(e);
 	if (ImGui::Begin("World"))
 	{
-		ImGui::ColorPicker4("Background Color", (float*)&mBackColor);
+		ImGui::ColorPicker4("Background Color", mBackColor.v);
+
+		static int temp = 0;
+		if (ImGui::ListBox("Sky Box", &temp, mSkyBoxNames.data(), mSkyBoxNames.size()))
+		{
+			mMainSkyBox = mSkyBoxes.at(mSkyBoxNames[temp]);
+		}
+
 	}
 	ImGui::End();
 
 	if (ImGui::Begin("Camera"))
 	{
-		ImGui::DragFloat("X", &VectorXRef(mCameraPosition));
-		ImGui::DragFloat("Y", &VectorYRef(mCameraPosition));
-		ImGui::DragFloat("Z", &VectorZRef(mCameraPosition));
+		ImGui::DragFloat("X", &mCameraPosition.x);
+		ImGui::DragFloat("Y", &mCameraPosition.y);
+		ImGui::DragFloat("Z", &mCameraPosition.z);
 
 		if (ImGui::Button("Reset Position"))
 		{
 			mCameraPosition = DEFAULT_CAMERA_POSITION;
 		}
 
-		ImGui::SliderAngle("Pitch", &VectorXRef(mCameraOrientation));
-		ImGui::SliderAngle("Yaw", &VectorYRef(mCameraOrientation));
-		ImGui::SliderAngle("Roll", &VectorZRef(mCameraOrientation));
+		ImGui::SliderAngle("Pitch", &mCameraOrientation.x);
+		ImGui::SliderAngle("Yaw", &mCameraOrientation.y);
+		ImGui::SliderAngle("Roll", &mCameraOrientation.z);
 
 		if (ImGui::Button("Reset Orientation"))
 		{
@@ -139,39 +164,50 @@ void TestApplication::onImGui(FrameEvent* e)
 
 	if (ImGui::Begin("Entity"))
 	{
-		int itemSelected = 0;
-		if (ImGui::ListBox("Entity", &itemSelected, mEntityNames.data(), mEntityNames.size()))
-		{
-			mNode->setEntity(&mEntities.at(mEntityNames[itemSelected]));
-		}
-
-		ImGui::DragFloat("X", &VectorXRef(mEntityPosition));
-		ImGui::DragFloat("Y", &VectorYRef(mEntityPosition));
-		ImGui::DragFloat("Z", &VectorZRef(mEntityPosition));
+		ImGui::DragFloat("X", &mEntityPosition.x);
+		ImGui::DragFloat("Y", &mEntityPosition.y);
+		ImGui::DragFloat("Z", &mEntityPosition.z);
 
 		if (ImGui::Button("Reset Position"))
 		{
 			mEntityPosition = DEFAULT_ENTITY_POSITION;
 		}
 
-		ImGui::SliderAngle("Pitch", &VectorXRef(mEntityOrientation));
-		ImGui::SliderAngle("Yaw", &VectorYRef(mEntityOrientation));
-		ImGui::SliderAngle("Roll", &VectorZRef(mEntityOrientation));
+		ImGui::SliderAngle("Pitch", &mEntityOrientation.x);
+		ImGui::SliderAngle("Yaw", &mEntityOrientation.y);
+		ImGui::SliderAngle("Roll", &mEntityOrientation.z);
 
 		if (ImGui::Button("Reset Orientation"))
 		{
 			mEntityOrientation = DEFAULT_ENTITY_ORIENTATION;
 		}
 
-		ImGui::DragFloat("X Scaling", &VectorXRef(mEntityScaling));
-		ImGui::DragFloat("Y Scaling", &VectorYRef(mEntityScaling));
-		ImGui::DragFloat("Z Scaling", &VectorZRef(mEntityScaling));
+		ImGui::DragFloat("X Scaling", &mEntityScaling.x);
+		ImGui::DragFloat("Y Scaling", &mEntityScaling.y);
+		ImGui::DragFloat("Z Scaling", &mEntityScaling.z);
 
 		if (ImGui::Button("Reset Scaling"))
 		{
 			mEntityScaling = DEFAULT_ENTITY_SCALING;
 		}
 
+		ImGui::SliderFloat("Animation Speed", &mAnimationSpeed, 0.0f, 2.0f);
+
+	}
+	ImGui::End();
+
+	if (ImGui::Begin("Light"))
+	{
+		ImGui::DragFloat("X", &mLightPosition.x);
+		ImGui::DragFloat("Y", &mLightPosition.y);
+		ImGui::DragFloat("Z", &mLightPosition.z);
+
+		if (ImGui::Button("Reset Position"))
+		{
+			mLightPosition = DEFAULT_LIGHT_POSITION;
+		}
+
+		ImGui::ColorPicker4("Color", mLightColor.v);
 	}
 	ImGui::End();
 }

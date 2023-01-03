@@ -18,16 +18,26 @@ namespace Geoxide {
 			std::string material;
 		};
 
+		struct AnimationTrack
+		{
+			struct
+			{
+				uint32_t numKeyFrames;
+			} desc;
+
+			std::pair<float, KeyFrame>* keyFrames;
+		};
+
 		struct Animation
 		{
 			struct
 			{
-				uint32_t numFrames;
+				uint32_t numTracks;
 				float duration;
 			} desc;
 			
 			std::string name;
-			Matrix* matrices;
+			AnimationTrack* tracks;
 		};
 
 		struct

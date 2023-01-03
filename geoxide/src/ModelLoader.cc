@@ -24,7 +24,10 @@ namespace Geoxide {
 		std::ifstream file(filepath, std::ios::binary);
 
 		if (!file.is_open())
+		{
+			Log::Error("Failed to open \'" + filepath + "\'");
 			return 0;
+		}
 
 		int magicNumber = 0;
 
@@ -55,10 +58,14 @@ namespace Geoxide {
 			READ_STR(subMesh.material);
 		}
 
+		model.bones = new Bone[model.desc.numBones];
+
 		for (uint32_t i = 0; i < model.desc.numBones; i++)
 		{
 			READ_BIN(model.bones[i]);
 		}
+
+		model.animations = new ModelData::Animation[model.desc.numAnimations] ;
 
 		for (uint32_t i = 0; i < model.desc.numAnimations; i++)
 		{
@@ -68,7 +75,18 @@ namespace Geoxide {
 
 			READ_STR(animation.name);
 
-			READ_BUFFER(animation.matrices, animation.desc.numFrames * model.desc.numBones * sizeof(Matrix));
+			animation.tracks = new ModelData::AnimationTrack[animation.desc.numTracks];
+
+			for (uint32_t f = 0; f < animation.desc.numTracks; f++)
+			{
+				ModelData::AnimationTrack& track = animation.tracks[f];
+
+				READ_BIN(track.desc);
+
+				track.keyFrames = new std::pair<float, KeyFrame>[track.desc.numKeyFrames];
+
+				READ_BUFFER(track.keyFrames, track.desc.numKeyFrames * sizeof(track.keyFrames[0]));
+			}
 		}
 
 		size_t size = file.tellg();
@@ -112,7 +130,14 @@ namespace Geoxide {
 
 			WRITE_STR(animation.name);
 
-			WRITE_BUFFER(animation.matrices, animation.desc.numFrames * model.desc.numBones * sizeof(Matrix));
+			for (uint32_t f = 0; f < animation.desc.numTracks; f++)
+			{
+				ModelData::AnimationTrack& track = animation.tracks[f];
+
+				WRITE_BIN(track.desc);
+
+				WRITE_BUFFER(track.keyFrames, track.desc.numKeyFrames * sizeof(track.keyFrames[0]));
+			}
 		}
 
 		size_t size = file.tellp();
@@ -126,5 +151,22 @@ namespace Geoxide {
 		delete model.vertexData;
 		delete model.indexData;
 		delete[model.desc.numSubMeshes] model.subMeshes;
+
+		delete model.bones;
+
+		for (size_t i = 0; i < model.desc.numAnimations; i++)
+		{
+			auto& a = model.animations[i];
+
+			for (size_t f = 0; f < a.desc.numTracks; f++)
+			{
+				auto& t = a.tracks[f];
+				delete t.keyFrames;
+			}
+
+			delete a.tracks;
+		}
+
+		delete[model.desc.numAnimations] model.animations;
 	}
 }

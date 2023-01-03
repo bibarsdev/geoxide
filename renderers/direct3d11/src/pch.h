@@ -2,6 +2,8 @@
 #ifndef __GX_D3D11_PCH_H__
 #define __GX_D3D11_PCH_H__
 
+#define _USE_MATH_DEFINES
+
 #include <iostream>
 
 #include <string>
@@ -18,7 +20,5 @@ namespace Geoxide {
 }
 
 #include <Geoxide/Base.h>
-
-#include "Geoxide/D3D11RendererBase.h"
 
 #endif // !__GEOXIDE_PCH_H__

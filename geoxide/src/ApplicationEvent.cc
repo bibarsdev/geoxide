@@ -21,7 +21,7 @@ namespace Geoxide {
 
 	void Application::onFrameStart(FrameEvent* e)
 	{
-		mScnMan.getRenderer()->startImGuiFrame();
+		mGfxDev->startImGuiFrame();
 		mWindow->startImGuiFrame();
 		ImGui::NewFrame();
 
@@ -32,6 +32,7 @@ namespace Geoxide {
 
 	void Application::onFrameEnd(FrameEvent*)
 	{
+		mGfxDev->drawImGui();
 	}
 
 	void Application::onImGui(FrameEvent*)

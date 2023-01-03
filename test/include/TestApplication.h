@@ -9,7 +9,7 @@ using namespace Geoxide;
 class TestApplication : public Application
 {
 public:
-	TestApplication() : Application("TestApplication") {}
+	TestApplication() : Application("TEST") {}
 	~TestApplication() {}
 
 	void start();
@@ -24,15 +24,22 @@ public:
 	void prepareScene();
 
 private:
-	Vector mBackColor;
-	Vector mCameraPosition;
-	Vector mCameraOrientation;
-	Vector mEntityPosition;
-	Vector mEntityOrientation;
-	Vector mEntityScaling;
-	std::unordered_map<std::string, ModelEntity> mEntities;
+	float4 mBackColor;
+	float3 mCameraPosition;
+	float3 mCameraOrientation;
+	float3 mEntityPosition;
+	float3 mEntityOrientation;
+	float3 mEntityScaling;
+	float3 mLightPosition;
+	float4 mLightColor;
+	Entity* mMainEntity;
+	Entity* mMainLight;
+	Entity* mMainSkyBox;
+	std::unordered_map<std::string, Entity*> mEntities;
 	std::vector<const char*> mEntityNames;
-	SceneNode* mNode;
+	std::unordered_map<std::string, Entity*> mSkyBoxes;
+	std::vector<const char*> mSkyBoxNames;
+	float mAnimationSpeed;
 };
 
 #endif

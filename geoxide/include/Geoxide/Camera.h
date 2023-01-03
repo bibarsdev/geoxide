@@ -3,7 +3,7 @@
 #define __GX_CAMERA_H__
 
 #include "Movable.h"
-#include "Renderer.h"
+#include "RendererDevice.h"
 
 namespace Geoxide {
 
@@ -37,19 +37,19 @@ namespace Geoxide {
 		float getViewWidth() const { return mWidth; }
 		float getViewHeight() const { return mHeight; }
 
-		MatrixConst getViewMatrix() { return mViewMatrix; }
-		MatrixConst getProjectionMatrix() { return mProjectionMatrix; }
+		float4x4 getViewMatrix() { return mViewMatrix; }
+		float4x4 getProjectionMatrix() { return mProjectionMatrix; }
 
-		void updateViewMatrix(Renderer* gfx);
-		void updateProjectionMatrix(Renderer* gfx);
+		void updateViewMatrix();
+		void updateProjectionMatrix(RendererDevice* gfx);
 
 	private:
 		float mWidth, mHeight;
 		float mNearZ, mFarZ;
 		float mFov;
 		ProjectionType mProjectionType;
-		Matrix mViewMatrix;
-		Matrix mProjectionMatrix;
+		float4x4 mViewMatrix;
+		float4x4 mProjectionMatrix;
 	};
 
 }

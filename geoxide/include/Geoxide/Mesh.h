@@ -2,35 +2,45 @@
 #ifndef __GX_MESH_H__
 #define __GX_MESH_H__
 
-#include "Material.h"
-#include "MeshData.h"
-#include "Movable.h"
+#include "GpuProgram.h"
+#include "GpuBuffer.h"
+#include "Texture.h"
+#include "RenderState.h"
 
 namespace Geoxide {
 
-	struct SubMesh
+	enum PrimitiveTopology
 	{
-		Material* material;
-		uint32_t indexStart, indexCount;
+		kPrimitiveTopologyPointList,
+		kPrimitiveTopologyLineList,
+		kPrimitiveTopologyTriangleList,
 	};
 
-	class Mesh
+	struct Material
 	{
-	public:
-		Mesh() : mMeshData(0), mSubMeshes(0), mNumSubMeshes(0) {}
+		Ref<GpuProgram> program;
+		std::vector<Ref<Texture>> textures;
+		Local<uint8_t> data;
+		uint32_t dataSize;
+	};
 
-		MeshData* getMeshData() const { return mMeshData; }
+	struct SubMeshDesc
+	{
+		uint32_t indexStart, indexCount;
+		Material* material;
+	};
 
-		const SubMesh* getSubMeshes() const { return mSubMeshes; }
-		uint32_t getNumSubMeshes() const { return mNumSubMeshes; }
+	struct MeshDesc
+	{
+		GpuBuffer* vBuffer;
+		GpuBuffer* iBuffer;
+		PrimitiveTopology topology;
+		uint32_t subCount;
+		bool isSkinned;
+	};
 
-	private:
-		MeshData* mMeshData;
-		SubMesh* mSubMeshes;
-		uint32_t mNumSubMeshes;
-
-	private:
-		friend class ResourceManager;
+	struct Mesh : Internal
+	{
 	};
 
 }
